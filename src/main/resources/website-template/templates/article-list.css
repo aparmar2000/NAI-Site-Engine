@@ -1,0 +1,15 @@
+div.article-list {
+    display: grid;
+    grid-column: 1;
+
+    gap: 10px;
+    /* background-color: #2196F3; */
+    padding: 10px;
+}
+  
+div.article-list > div.article {
+    background-color: #22253F;
+    text-align: center;
+    font-size: larger;
+    padding: 20px;
+}

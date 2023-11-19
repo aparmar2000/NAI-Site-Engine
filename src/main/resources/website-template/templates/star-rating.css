@@ -1,0 +1,48 @@
+/* Base setup */
+@import url(//netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css);
+
+/* Ratings widget */
+.rate {
+    display: inline-block;
+    border: 0;
+}
+/* Hide radio */
+.rate > input {
+    display: none;
+}
+/* Order correctly by floating highest to the right */
+.rate > label {
+    float: right;
+    color: #0E0f21;
+    font-weight: bold;
+}
+/* The star of the show */
+.rate > label:before {
+    display: inline-block;
+    font-size: 1.65rem;
+    padding: .3rem .2rem;
+    margin: 0;
+    font-family: FontAwesome;
+    content: "\f005 "; /* full star */
+}
+.rate:not([disabled], [readonly]) > label::before {
+    cursor: pointer;
+}
+/* Zero stars rating */
+.rate > label:last-child:before {
+    content: "\f006 "; /* empty star outline */
+}
+/* Half star trick */
+.rate .half:before {
+    content: "\f089 "; /* half star no outline */
+    position: absolute;
+    padding-right: 0;
+}
+/* Click + hover color */
+.rate input:checked ~ label, /* color current and previous stars on checked */
+.rate:not([disabled], [readonly]) label:hover, .rate:not([disabled], [readonly]) label:hover ~ label { color: #F5F3C2;  } /* color previous stars on hover */
+
+/* Hover highlights */
+.rate:not([disabled], [readonly]) input:checked + label:hover, .rate:not([disabled], [readonly]) input:checked ~ label:hover, /* highlight current and previous stars */
+.rate:not([disabled], [readonly]) input:checked ~ label:hover ~ label, /* highlight previous selected stars for new rating */
+.rate:not([disabled], [readonly]) label:hover ~ input:checked ~ label /* highlight previous selected stars */ { color: #faf9e0;  } 

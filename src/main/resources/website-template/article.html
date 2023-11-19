@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <title>NAI News - News Articles From A Parallel Universe</title>
+    <meta content="width=device-width, initial-scale=1.0" name="viewport">
+
+    {{special-css}}
+</head>
+
+<body>
+    {{template-header}}
+    <br>
+    <div id="article-container">
+        {{special-article-category}}
+        <br>
+        <h1>{{special-article-title}}</h1>
+        <br>
+        {{special-article-image}}
+        <br>
+        <br>
+        <div>
+            <p class='article-body'>{{special-article-body}}</p>
+        </div>
+        {{template-star-rating enabled:true}}
+    </div>
+    <br>
+    {{template-article-list}}
+</body>
+
+</html>

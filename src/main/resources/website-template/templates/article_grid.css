@@ -1,0 +1,31 @@
+div.article-grid {
+    display: grid;
+    grid-template-areas: 
+        'latest latest . .'
+        'latest latest . .'
+        'wide wide . .';
+    height: 150%;
+
+    gap: 10px;
+    /* background-color: #2196F3; */
+    padding: 10px;
+}
+  
+div.article-grid > div.article {
+    background-color: #22253F;
+    text-align: center;
+    font-size: larger;
+    padding: 20px;
+}
+
+div.article-grid > div.article img.article-image {
+    width: 80%;
+}
+  
+div.article-grid .latest-article {
+    grid-area: latest;
+}
+  
+div.article-grid .wide-article {
+    grid-area: wide;
+}

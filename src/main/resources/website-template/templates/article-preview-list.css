@@ -1,0 +1,15 @@
+div.article-list-listing .article-image {
+    width: 20%;
+    float: left;
+    margin-right: 20px;
+}
+div.article-list-listing .article-category {
+    font-variant: small-caps;
+    font-weight: bold;
+    color: #9773FF;
+}
+
+div.article-list-listing .rate > label:before {
+    font-size: 1rem;
+    padding: .15rem .1rem;
+}

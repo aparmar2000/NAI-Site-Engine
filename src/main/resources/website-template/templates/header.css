@@ -1,0 +1,31 @@
+.navbar-brand > img {
+    width: 20%;
+}
+
+.navbar-categories ul {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
+    background-color: #13142C;
+}
+  
+.navbar-categories  li {
+    float: left;
+}
+  
+.navbar-categories li a {
+    display: block;
+    color: #F7F7F7;
+    text-align: center;
+    padding: 14px 16px;
+    text-decoration: none;
+}
+  
+.navbar-categories li:has(a:hover) {
+    filter: brightness(75%);
+}
+
+.navbar-categories li.active {
+    background-color: #363963;
+}

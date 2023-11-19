@@ -1,0 +1,10 @@
+body {
+    background-color: #191B31;
+    color: #F7F7F7;
+}
+
+.pagination-link {
+    color: #75CF67;
+    font-weight: bolder;
+    font-size: larger;
+}
