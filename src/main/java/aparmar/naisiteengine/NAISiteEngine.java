@@ -17,12 +17,12 @@ import aparmar.nai.data.request.imagen.ImageParameters;
 import aparmar.nai.data.request.imagen.ImageParameters.ImageGenSampler;
 import aparmar.nai.utils.TextParameterPresets;
 import aparmar.naisiteengine.config.UserConfiguration;
-import aparmar.naisiteengine.httphandlers.ArticleRatingUpdateHttpHandler;
+import aparmar.naisiteengine.httphandlers.EntryRatingUpdateHttpHandler;
 import aparmar.naisiteengine.httphandlers.CategoryResolvingHttpHandler;
 import aparmar.naisiteengine.httphandlers.DefaultRoutingHttpHandler;
 import aparmar.naisiteengine.httphandlers.LocalResourceHttpHandler;
-import aparmar.naisiteengine.templating.ArticleGroupTemplateIdHandler;
-import aparmar.naisiteengine.templating.ArticleTemplateProvider;
+import aparmar.naisiteengine.templating.EntryGroupTemplateIdHandler;
+import aparmar.naisiteengine.templating.EntryTemplateProvider;
 import aparmar.naisiteengine.templating.CategoryNameProvider;
 import aparmar.naisiteengine.templating.CategoryPaginationProvider;
 import aparmar.naisiteengine.templating.CategoryTemplateProvider;
@@ -95,11 +95,11 @@ public class NAISiteEngine {
 		specialTemplateProviders.add(new CssTemplateProvider());
 		specialTemplateProviders.add(new CategoryNameProvider());
 		specialTemplateProviders.add(new CategoryTemplateProvider());
-		specialTemplateProviders.add(new ArticleTemplateProvider());
+		specialTemplateProviders.add(new EntryTemplateProvider());
 		specialTemplateProviders.add(new CategoryPaginationProvider());
 		ArrayList<ITemplateHandler> templateHandlers = new ArrayList<>();
-		templateHandlers.add(new ArticleGroupTemplateIdHandler("article_grid", "article-preview-grid"));
-		templateHandlers.add(new ArticleGroupTemplateIdHandler("article-list", "article-preview-list"));
+		templateHandlers.add(new EntryGroupTemplateIdHandler("article_grid", "article-preview-grid"));
+		templateHandlers.add(new EntryGroupTemplateIdHandler("article-list", "article-preview-list"));
 		templateHandlers.add(new StarRatingTemplateHandler());
 		TemplateParser templateParser = new TemplateParser(
 				"/website-template", config, entryManager,
@@ -115,7 +115,7 @@ public class NAISiteEngine {
 				new LocalResourceHttpHandler.RedirectEntry("", "/website-template", true), 
 				templateParser, 
 				errorPageHandler);
-		ArticleRatingUpdateHttpHandler articleRatingUpdateHttpHandler = new ArticleRatingUpdateHttpHandler(entryManager, localResourceHandler);
+		EntryRatingUpdateHttpHandler articleRatingUpdateHttpHandler = new EntryRatingUpdateHttpHandler(entryManager, localResourceHandler);
 		CategoryResolvingHttpHandler categoryResolvingHttpHandler = new CategoryResolvingHttpHandler(articleRatingUpdateHttpHandler);
 		DefaultRoutingHttpHandler defaultRoutingHandler = new DefaultRoutingHttpHandler(categoryResolvingHttpHandler);
 		HttpHandler rootHandler = new CanonicalPathHandler(defaultRoutingHandler);

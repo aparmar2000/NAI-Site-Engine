@@ -28,19 +28,19 @@ public class TemplateParser {
 	@Getter
 	private final UserConfiguration config;
 	@Getter
-	private final EntryManager articleManager;
+	private final EntryManager entryManager;
 	private final List<ISpecialTemplateProvider> specialTemplateProviders;
 	private final List<ITemplateHandler> templateHandlers;
 	
 	public static final String SEED_PARAM_KEY = "seed";
 	
 	
-	public TemplateParser(String internalRootDirectory, UserConfiguration config, EntryManager articleManager,
+	public TemplateParser(String internalRootDirectory, UserConfiguration config, EntryManager entryManager,
 			List<ISpecialTemplateProvider> specialTemplateProviders,
 			List<ITemplateHandler> templateHandlers) {
 		this.internalRootDirectory = internalRootDirectory;
 		this.config = config;
-		this.articleManager = articleManager;
+		this.entryManager = entryManager;
 		this.specialTemplateProviders = specialTemplateProviders;
 		this.templateHandlers = templateHandlers;
 	}

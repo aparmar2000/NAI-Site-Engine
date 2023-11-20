@@ -1,6 +1,6 @@
 package aparmar.naisiteengine.templating;
 
-import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_ARTICLE_ID;
+import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_ENTRY_ID;
 
 import java.util.Deque;
 import java.util.Optional;
@@ -25,26 +25,26 @@ public class StarRatingTemplateHandler implements ITemplateHandler {
 
 	@Override
 	public String processTemplate(String templateName, String templateHtml, TemplateParsingContext parsingContext) {
-		EntryManager articleManager = parsingContext.getTemplateParser().getArticleManager();
+		EntryManager entryManager = parsingContext.getTemplateParser().getEntryManager();
 		
 		boolean isEnabled = Optional.ofNullable(parsingContext.getLayerParameters().get(ENABLED_PROPERTY_KEY))
 				.map(v->v.equals("true"))
 				.orElse(false);
 
-		String articleIdParam = parsingContext.getLayerParameters()
-				.get(NaiSiteEngineConstants.LAYER_PARAM_ARTICLE_ID);
-		int articleIdQueryParam = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_ARTICLE_ID))
+		String entryIdParam = parsingContext.getLayerParameters()
+				.get(NaiSiteEngineConstants.LAYER_PARAM_ENTRY_ID);
+		int articleIdQueryParam = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_ENTRY_ID))
 				.map(Deque::getFirst)
 				.map(Integer::parseInt)
 				.orElse(-1);
-		int articleId = 0;
-		if (articleIdParam!=null && articleIdParam.matches("^\\d+$")) {
-			articleId = Integer.parseUnsignedInt(articleIdParam);
+		int entryId = 0;
+		if (entryIdParam!=null && entryIdParam.matches("^\\d+$")) {
+			entryId = Integer.parseUnsignedInt(entryIdParam);
 		} else if (articleIdQueryParam>=0) {
-			articleId = articleIdQueryParam;
+			entryId = articleIdQueryParam;
 		}
 		
-		EntryData currentArticle = articleManager.getGeneratedEntryById(articleId);
+		EntryData currentArticle = entryManager.getGeneratedEntryById(entryId);
 		if (currentArticle == null) { return "ERR: unknown article id"; }
 		int currentArticleRating = currentArticle.getHalfStarRating();
 
@@ -54,7 +54,7 @@ public class StarRatingTemplateHandler implements ITemplateHandler {
 		if (isEnabled) {
 			templateHtml = templateHtml.replaceFirst(
 					"(<form action=\\\"update-rating)(\\\")", 
-					"$1?"+QUERY_PARAM_ARTICLE_ID+"="+articleId+"$2");
+					"$1?"+QUERY_PARAM_ENTRY_ID+"="+entryId+"$2");
 		} else {
 			templateHtml = templateHtml.replaceFirst("<iframe.*</iframe>", "");
 			

@@ -1,6 +1,6 @@
 package aparmar.naisiteengine.httphandlers;
 
-import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_ARTICLE_ID;
+import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_ENTRY_ID;
 
 import java.util.Deque;
 import java.util.Map;
@@ -21,11 +21,11 @@ import io.undertow.util.StatusCodes;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
-public class ArticleRatingUpdateHttpHandler implements HttpHandler {
+public class EntryRatingUpdateHttpHandler implements HttpHandler {
 	private final static String ENDPOINT_PATH = "/update-rating";
 	private final static Set<HttpString> ACCEPTED_METHODS = ImmutableSet.of(Methods.PUT, Methods.POST);
 	
-	private final EntryManager articleManager;
+	private final EntryManager entryManager;
 	private final HttpHandler next;
 
 	@Override
@@ -44,15 +44,15 @@ public class ArticleRatingUpdateHttpHandler implements HttpHandler {
 				.orElse(-1);
 		if (newRating < 0) { throwBadRequest(exchange); return; }
 
-		int articleId = Optional.ofNullable(exchange.getQueryParameters().get(QUERY_PARAM_ARTICLE_ID))
+		int entryId = Optional.ofNullable(exchange.getQueryParameters().get(QUERY_PARAM_ENTRY_ID))
 				.map(Deque::getFirst)
 				.map(Integer::parseInt)
 				.orElse(-1);
-		EntryData updatedArticle = articleManager.getGeneratedEntryById(articleId);
-		if (updatedArticle == null) { throwBadRequest(exchange); return; }
+		EntryData updatedEntry = entryManager.getGeneratedEntryById(entryId);
+		if (updatedEntry == null) { throwBadRequest(exchange); return; }
 		
-		updatedArticle.setHalfStarRating(newRating);
-		articleManager.saveExistingGeneratedEntry(updatedArticle.getId());
+		updatedEntry.setHalfStarRating(newRating);
+		entryManager.saveExistingGeneratedEntry(updatedEntry.getId());
 		
 		exchange.getResponseSender().close();
 	}
