@@ -39,7 +39,7 @@ public class EntryGroupTemplateIdHandler implements ITemplateHandler {
 				.map(de->de.getFirst())
 				.map(Integer::parseInt)
 				.orElse(0);
-		int articleId = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_ENTRY_ID))
+		int entryId = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_ENTRY_ID))
 				.map(Deque::getFirst)
 				.map(Integer::parseInt)
 				.orElse(-1);
@@ -52,7 +52,7 @@ public class EntryGroupTemplateIdHandler implements ITemplateHandler {
 		for(int i=0;i<startIndex&&!orderedEntryIds.isEmpty();i++) { orderedEntryIds.poll(); }
 		
 		templateHtml = NaiSiteEngineUtils.regexSpliceString(ITemplateHandler.TEMPLATE_REGEX, templateHtml, (match)->{
-			if (!orderedEntryIds.isEmpty() && orderedEntryIds.peek()==articleId) {orderedEntryIds.poll(); }
+			if (!orderedEntryIds.isEmpty() && orderedEntryIds.peek()==entryId) {orderedEntryIds.poll(); }
 			if (orderedEntryIds.isEmpty()) { return match.group(); }
 			
 			String matchTemplateName = match.group(1);

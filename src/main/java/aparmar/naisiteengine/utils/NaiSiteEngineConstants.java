@@ -10,6 +10,6 @@ public class NaiSiteEngineConstants {
 	
 	public static final String QUERY_PARAM_CATEGORY = "cat";
 	public static final String QUERY_PARAM_PAGINATION_START = "startIdx";
-	public static final String QUERY_PARAM_ENTRY_ID = "articleId";
-	public static final String LAYER_PARAM_ENTRY_ID = "article-id";
+	public static final String QUERY_PARAM_ENTRY_ID = "entryId";
+	public static final String LAYER_PARAM_ENTRY_ID = "entry-id";
 }

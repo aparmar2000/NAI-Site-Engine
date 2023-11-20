@@ -33,7 +33,7 @@ public class GenerationConfiguration {
 		targetCacheSize = 16;
 		model = TextGenModel.KAYRA;
 		imageGenerationEnabled = true;
-		tags = new String[] {"satire", "article", "news"};
+		tags = new String[] {"satire", "entry", "news"};
 		genres = new String[] {"Article"};
 		styles = new String[] {"formal", "advanced", "professional"};
 		categoryDescriptor = "News Category";

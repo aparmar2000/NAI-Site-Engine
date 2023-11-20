@@ -63,7 +63,7 @@ public class EntryData {
 				sample = mergedSample;
 			}
 		}
-		return sample + ", stock photo, realistic, news, article, ";
+		return sample + ", stock photo, realistic, news, entry, ";
 	}
 
 	private static final int FILENAME_LENGTH_LIMIT = 25;
@@ -91,10 +91,10 @@ public class EntryData {
 		int id = -1;
 		LocalDateTime creationDateTime = LocalDateTime.now();
 		String imgFilename = "";
-		String instructString = "{ Write a satirical news article }";
+		String instructString = "{ Write a satirical news entry }";
 		String title = matcher.group(2);
 		String category = matcher.group(1);
-		String articleBody = matcher.group(3);
+		String entryBody = matcher.group(3);
 		int halfStarRating = -10;
 		
 		return new EntryData(
@@ -104,7 +104,7 @@ public class EntryData {
 				instructString, 
 				title, 
 				category, 
-				articleBody, 
+				entryBody, 
 				halfStarRating);
 	}
 	
@@ -112,10 +112,10 @@ public class EntryData {
 		int id = -1;
 		LocalDateTime creationDateTime = LocalDateTime.of(2023, Month.JULY, 28, 10, 53);
 		String imgFilename = "";
-		String instructString = "{ Write a satirical news article }";
+		String instructString = "{ Write a satirical news entry }";
 		String title = null;
 		String category = "";
-		String articleBody = null;
+		String entryBody = null;
 		int halfStarRating = 5;
 		
 		Load yamlReader = new Load(LoadSettings.builder().build());
@@ -142,14 +142,14 @@ public class EntryData {
 				category = (String) yamlData.get(CATEGORY_STRING_KEY);
 			}
 			if (yamlData.containsKey(BODY_STRING_KEY)) {
-				articleBody = (String) yamlData.get(BODY_STRING_KEY);
+				entryBody = (String) yamlData.get(BODY_STRING_KEY);
 			}
 			if (yamlData.containsKey(RATING_INTEGER_KEY)) {
 				halfStarRating = (Integer) yamlData.get(RATING_INTEGER_KEY);
 			}
 		}
 		if (title==null) { throw new IOException(inFile+" has no recognized title."); }
-		if (articleBody==null) { throw new IOException(inFile+" has no recognized body."); }
+		if (entryBody==null) { throw new IOException(inFile+" has no recognized body."); }
 		
 		return new EntryData(
 				id,
@@ -158,7 +158,7 @@ public class EntryData {
 				instructString,
 				title,
 				category,
-				articleBody,
+				entryBody,
 				halfStarRating);
 	}
 	

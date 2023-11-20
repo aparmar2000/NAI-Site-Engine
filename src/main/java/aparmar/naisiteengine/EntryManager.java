@@ -126,12 +126,12 @@ public class EntryManager {
 	}
 
 	public synchronized void saveExistingGeneratedEntry(int id) {
-		EntryData articleToSave = generatedEntries.get(id);
-		if (articleToSave==null) { return; }
+		EntryData entryToSave = generatedEntries.get(id);
+		if (entryToSave==null) { return; }
 
-		File outputFile = new File(generatedEntryDirectory+"/"+articleToSave.getEntryFilename()+".yaml");
+		File outputFile = new File(generatedEntryDirectory+"/"+entryToSave.getEntryFilename()+".yaml");
 		try {
-			articleToSave.saveToFile(outputFile);
+			entryToSave.saveToFile(outputFile);
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
@@ -160,7 +160,7 @@ public class EntryManager {
 	}
 	public Optional<EntryData> tryGetGeneratedEntryWithoutImage() {
 		return generatedEntries.values().stream()
-				.filter(article->article.getImgFilename().isEmpty())
+				.filter(entry->entry.getImgFilename().isEmpty())
 				.findAny();
 	}
 	public EntryData[] getGeneratedEntriesOfCategoryOrderedByNewest(String category) {
@@ -207,7 +207,7 @@ public class EntryManager {
 	}
 	public int getUnreadGeneratedEntryCount() {
 		return (int) generatedEntries.values().stream()
-				.filter(article->article.getHalfStarRating()<0)
+				.filter(entry->entry.getHalfStarRating()<0)
 				.count();
 	}
 	public Map<String, Integer> getUnreadGeneratedEntryCountByCategory() {
@@ -245,7 +245,7 @@ public class EntryManager {
 	public EntryData[] getGeneratedEntriesSortedByCategoryAndScore(String category) {
 		EntryData[] sortedEntries = generatedEntries.values()
 				.stream()
-				.filter(article->article.getHalfStarRating()>0)
+				.filter(entry->entry.getHalfStarRating()>0)
 				.toArray(EntryData[]::new);
 		
 		Arrays.sort(sortedEntries, (a,b)->{

@@ -34,7 +34,7 @@ public class EntryImageGenerationManager implements Runnable {
 				if (imagelessArticleOptional.isPresent()) {
 					EntryData imagelessArticle = imagelessArticleOptional.get();
 					try {
-						IMAGE_GEN_THREAD_LOGGER.info("\tGenerating article image...");
+						IMAGE_GEN_THREAD_LOGGER.info("\tGenerating entry image...");
 						ImageSetWrapper generatedImageSet = nai.generateImage(baseImageGenerationRequest.toBuilder()
 								.input(imagelessArticle.imagePrompt())
 								.build());
@@ -42,7 +42,7 @@ public class EntryImageGenerationManager implements Runnable {
 						String imgFilename = imagelessArticle.getEntryFilename()+".png";
 						File imgFile = entryManager.getGeneratedEntryDirectory().toPath().resolve(imgFilename).toFile();
 
-						IMAGE_GEN_THREAD_LOGGER.info("Saving article image...");
+						IMAGE_GEN_THREAD_LOGGER.info("Saving entry image...");
 						generatedImageSet.writeImageToFile(0, imgFile);
 						imagelessArticle.setImgFilename(imgFilename);
 						

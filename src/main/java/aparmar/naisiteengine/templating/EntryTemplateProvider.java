@@ -18,12 +18,12 @@ import aparmar.naisiteengine.EntryData;
 import aparmar.naisiteengine.utils.NaiSiteEngineConstants;
 
 public class EntryTemplateProvider implements ISpecialTemplateProvider {
-	public static final String ENTRY_LINK_SPECIAL_KEY = "article-link";
-	public static final String ENTRY_IMAGE_SPECIAL_KEY = "article-image";
-	public static final String ENTRY_CATEGORY_SPECIAL_KEY = "article-category";
-	public static final String ENTRY_TITLE_SPECIAL_KEY = "article-title";
-	public static final String ENTRY_SNIPPET_SPECIAL_KEY = "article-snippet";
-	public static final String ENTRY_BODY_SPECIAL_KEY = "article-body";
+	public static final String ENTRY_LINK_SPECIAL_KEY = "entry-link";
+	public static final String ENTRY_IMAGE_SPECIAL_KEY = "entry-image";
+	public static final String ENTRY_CATEGORY_SPECIAL_KEY = "entry-category";
+	public static final String ENTRY_TITLE_SPECIAL_KEY = "entry-title";
+	public static final String ENTRY_SNIPPET_SPECIAL_KEY = "entry-snippet";
+	public static final String ENTRY_BODY_SPECIAL_KEY = "entry-body";
 	
 	private static final String ENTRY_ID_LATEST = "latest";
 	private static final String ENTRY_ID_RANDOM = "random";
@@ -47,44 +47,44 @@ public class EntryTemplateProvider implements ISpecialTemplateProvider {
 				.map(de->de.getFirst())
 				.orElse("all");
 
-		String articleIdParam = parsingContext.getLayerParameters()
+		String entryIdParam = parsingContext.getLayerParameters()
 				.get(NaiSiteEngineConstants.LAYER_PARAM_ENTRY_ID);
 		int entryIdQueryParam = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_ENTRY_ID))
 				.map(Deque::getFirst)
 				.map(Integer::parseInt)
 				.orElse(-1);
-		int articleId = 1;
-		if (articleIdParam!=null) {
-			if (articleIdParam.matches("^\\d+$")) {
-				articleId = Integer.parseUnsignedInt(articleIdParam);
-			} else if (articleIdParam.equals(ENTRY_ID_LATEST)) {
-				articleId = entryManager.getLatestGeneratedEntryIdByCategory(currentCategory);
-			} else if (articleIdParam.equals(ENTRY_ID_RANDOM)) {
+		int entryId = 1;
+		if (entryIdParam!=null) {
+			if (entryIdParam.matches("^\\d+$")) {
+				entryId = Integer.parseUnsignedInt(entryIdParam);
+			} else if (entryIdParam.equals(ENTRY_ID_LATEST)) {
+				entryId = entryManager.getLatestGeneratedEntryIdByCategory(currentCategory);
+			} else if (entryIdParam.equals(ENTRY_ID_RANDOM)) {
 				Random rng = new Random(
 						Long.parseLong(parsingContext.getLayerParameters()
 								.getOrDefault(TemplateParser.SEED_PARAM_KEY, "0")));
-				articleId = entryManager.getRandomGeneratedEntryIdByCategory(rng, currentCategory);
+				entryId = entryManager.getRandomGeneratedEntryIdByCategory(rng, currentCategory);
 			}
 		} else if (entryIdQueryParam>=0) {
-			articleId = entryIdQueryParam;
+			entryId = entryIdQueryParam;
 		} else {
-			return templateName+" parse error: invalid article-id";
+			return templateName+" parse error: invalid entry-id";
 		}
 		
-		EntryData entryData = entryManager.getGeneratedEntryById(articleId);
+		EntryData entryData = entryManager.getGeneratedEntryById(entryId);
 		switch (templateName) {
 		case ENTRY_LINK_SPECIAL_KEY:
-			return "article.html?"+QUERY_PARAM_CATEGORY+"="+entryData.getCategory()+"&"+QUERY_PARAM_ENTRY_ID+"="+articleId;
+			return "entry.html?"+QUERY_PARAM_CATEGORY+"="+entryData.getCategory()+"&"+QUERY_PARAM_ENTRY_ID+"="+entryId;
 		case ENTRY_IMAGE_SPECIAL_KEY:
 			String imgSrc = "https://placehold.co/768x512/png";
 			if (!entryData.getImgFilename().isEmpty()) {
-				imgSrc = "articles/"+entryData.getImgFilename();
+				imgSrc = "entrys/"+entryData.getImgFilename();
 			}
-			return "<img src=\""+imgSrc+"\" class=\"article-image\">";
+			return "<img src=\""+imgSrc+"\" class=\"entry-image\">";
 		case ENTRY_TITLE_SPECIAL_KEY:
 			return entryData.getTitle();
 		case ENTRY_CATEGORY_SPECIAL_KEY:
-			return "<a href=\"category.html?"+QUERY_PARAM_CATEGORY+"="+entryData.getCategory()+"\" class=\"article-category\">"+entryData.getCategory()+"</a>";
+			return "<a href=\"category.html?"+QUERY_PARAM_CATEGORY+"="+entryData.getCategory()+"\" class=\"entry-category\">"+entryData.getCategory()+"</a>";
 		case ENTRY_SNIPPET_SPECIAL_KEY:
 			return Arrays.stream(entryData.getEntryBody().split(" "))
 					.limit(30)

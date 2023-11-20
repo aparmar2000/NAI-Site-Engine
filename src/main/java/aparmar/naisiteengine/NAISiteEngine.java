@@ -70,7 +70,7 @@ public class NAISiteEngine {
 		EntryManager entryManager = new EntryManager(new File("entries"), config);
 		MAIN_THREAD_LOGGER.info(entryManager.getTemplateEntryCount()+" template entries loaded");
 		MAIN_THREAD_LOGGER.info("Template entries per category: "+entryManager.getTemplateEntryCountByCategory());
-		MAIN_THREAD_LOGGER.info(entryManager.getGeneratedEntryCount()+" generated articles loaded");
+		MAIN_THREAD_LOGGER.info(entryManager.getGeneratedEntryCount()+" generated entrys loaded");
 		MAIN_THREAD_LOGGER.info("Generated entries per category: "+entryManager.getGeneratedEntryCountByCategory());
 		ExampleContext exampleContext = initExampleContext(parameterPreset, config, entryManager);
 		
@@ -98,8 +98,8 @@ public class NAISiteEngine {
 		specialTemplateProviders.add(new EntryTemplateProvider());
 		specialTemplateProviders.add(new CategoryPaginationProvider());
 		ArrayList<ITemplateHandler> templateHandlers = new ArrayList<>();
-		templateHandlers.add(new EntryGroupTemplateIdHandler("article_grid", "article-preview-grid"));
-		templateHandlers.add(new EntryGroupTemplateIdHandler("article-list", "article-preview-list"));
+		templateHandlers.add(new EntryGroupTemplateIdHandler("entry_grid", "entry-preview-grid"));
+		templateHandlers.add(new EntryGroupTemplateIdHandler("entry-list", "entry-preview-list"));
 		templateHandlers.add(new StarRatingTemplateHandler());
 		TemplateParser templateParser = new TemplateParser(
 				"/website-template", config, entryManager,
@@ -107,7 +107,7 @@ public class NAISiteEngine {
 				templateHandlers);
 		
 		ArrayList<LocalResourceHttpHandler.RedirectEntry> redirectEntries = new ArrayList<>();
-		redirectEntries.add(new LocalResourceHttpHandler.RedirectEntry("/articles", "articles/generated", false));
+		redirectEntries.add(new LocalResourceHttpHandler.RedirectEntry("/entrys", "entrys/generated", false));
 		
 		SimpleErrorPageHandler errorPageHandler = new SimpleErrorPageHandler();
 		LocalResourceHttpHandler localResourceHandler = new LocalResourceHttpHandler(
@@ -115,8 +115,8 @@ public class NAISiteEngine {
 				new LocalResourceHttpHandler.RedirectEntry("", "/website-template", true), 
 				templateParser, 
 				errorPageHandler);
-		EntryRatingUpdateHttpHandler articleRatingUpdateHttpHandler = new EntryRatingUpdateHttpHandler(entryManager, localResourceHandler);
-		CategoryResolvingHttpHandler categoryResolvingHttpHandler = new CategoryResolvingHttpHandler(articleRatingUpdateHttpHandler);
+		EntryRatingUpdateHttpHandler entryRatingUpdateHttpHandler = new EntryRatingUpdateHttpHandler(entryManager, localResourceHandler);
+		CategoryResolvingHttpHandler categoryResolvingHttpHandler = new CategoryResolvingHttpHandler(entryRatingUpdateHttpHandler);
 		DefaultRoutingHttpHandler defaultRoutingHandler = new DefaultRoutingHttpHandler(categoryResolvingHttpHandler);
 		HttpHandler rootHandler = new CanonicalPathHandler(defaultRoutingHandler);
 		
@@ -131,9 +131,9 @@ public class NAISiteEngine {
 	private static ExampleContext initExampleContext(
 			TextGenerationParameters parameterPreset,
 			UserConfiguration config,
-			EntryManager articleManager) {
+			EntryManager entryManager) {
 		ExampleContext exampleContext = new ExampleContext(
-				articleManager,
+				entryManager,
 				TextGenModel.KAYRA.getTokenizerForModel(),
 				8192);
 		exampleContext.setMemoryText(config.getGenerationConfig().getMemoryText()+"\n"+DINKUS);

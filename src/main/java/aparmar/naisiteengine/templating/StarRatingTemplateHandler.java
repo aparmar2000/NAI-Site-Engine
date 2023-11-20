@@ -33,19 +33,19 @@ public class StarRatingTemplateHandler implements ITemplateHandler {
 
 		String entryIdParam = parsingContext.getLayerParameters()
 				.get(NaiSiteEngineConstants.LAYER_PARAM_ENTRY_ID);
-		int articleIdQueryParam = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_ENTRY_ID))
+		int entryIdQueryParam = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_ENTRY_ID))
 				.map(Deque::getFirst)
 				.map(Integer::parseInt)
 				.orElse(-1);
 		int entryId = 0;
 		if (entryIdParam!=null && entryIdParam.matches("^\\d+$")) {
 			entryId = Integer.parseUnsignedInt(entryIdParam);
-		} else if (articleIdQueryParam>=0) {
-			entryId = articleIdQueryParam;
+		} else if (entryIdQueryParam>=0) {
+			entryId = entryIdQueryParam;
 		}
 		
 		EntryData currentArticle = entryManager.getGeneratedEntryById(entryId);
-		if (currentArticle == null) { return "ERR: unknown article id"; }
+		if (currentArticle == null) { return "ERR: unknown entry id"; }
 		int currentArticleRating = currentArticle.getHalfStarRating();
 
 		if (currentArticleRating>=0) {

@@ -9,7 +9,7 @@ import lombok.Getter;
 public class ExampleContext {
 	private final TokenizedChunk memoryChunk;
 	
-	private final EntryManager articleManager;
+	private final EntryManager entryManager;
 	
 	@Getter
 	private double baseExampleContextAlloc = 0.35;
@@ -20,8 +20,8 @@ public class ExampleContext {
 	@Getter
 	private Tokenizers tokenizer;
 	
-	public ExampleContext(EntryManager articleManager, Tokenizers tokenizer, int contextLength) {
-		this.articleManager = articleManager;
+	public ExampleContext(EntryManager entryManager, Tokenizers tokenizer, int contextLength) {
+		this.entryManager = entryManager;
 		this.tokenizer = tokenizer;
 		this.contextLength = contextLength;
 		
@@ -60,7 +60,7 @@ public class ExampleContext {
 		final int generatedExampleTokenThreshold = (int) Math.round(availableTokenBudget*generatedExampleContextAlloc);
 
 		TokenizedChunk baseExamplesChunk = new TokenizedChunk(getTokenizer(), "");
-		EntryData[] orderedBaseExamples = articleManager.getTemplateEntriesSpecifiedCategoryFirst(category, rng);
+		EntryData[] orderedBaseExamples = entryManager.getTemplateEntriesSpecifiedCategoryFirst(category, rng);
 		for (EntryData baseExample : orderedBaseExamples) {
 			
 			TokenizedChunk tokenizedBaseExample = new TokenizedChunk(getTokenizer(), "\n"+baseExample.mergedText());
@@ -74,7 +74,7 @@ public class ExampleContext {
 
 		if (useGenerated) {
 			TokenizedChunk generatedExamplesChunk = new TokenizedChunk(getTokenizer(), "");
-			EntryData[] orderedGeneratedExamples = articleManager.getGeneratedEntriesSortedByCategoryAndScore(category);
+			EntryData[] orderedGeneratedExamples = entryManager.getGeneratedEntriesSortedByCategoryAndScore(category);
 			for (EntryData generatedExample : orderedGeneratedExamples) {
 				
 				TokenizedChunk tokenizedGeneratedExample = new TokenizedChunk(getTokenizer(), "\n"+generatedExample.mergedText());

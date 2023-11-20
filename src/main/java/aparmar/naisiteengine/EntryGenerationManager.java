@@ -177,7 +177,7 @@ public class EntryGenerationManager implements Runnable {
 			generatedChunk.appendTokenizedChunk(latestGeneration.getOutput());
 			
 			generations++;
-			ENTRY_GEN_THREAD_LOGGER.info("\tGenerating '"+category+"' article... (step "+generations+", phase "+generationPhase+", length "+String.format("%,d", generatedChunk.getTokens().length)+")");
+			ENTRY_GEN_THREAD_LOGGER.info("\tGenerating '"+category+"' entry... (step "+generations+", phase "+generationPhase+", length "+String.format("%,d", generatedChunk.getTokens().length)+")");
 		}
 		
 		return EntryData.loadFromString(generatedChunk.getTextChunk());
