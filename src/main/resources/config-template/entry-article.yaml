@@ -1,0 +1,72 @@
+entry:
+  name: article
+  text-generation-config:
+    generation-context:
+      tags:
+        - satire
+        - article
+        - news
+      genres:
+        - Article
+      styles:
+        - formal
+        - advanced
+        - professional
+      max-examples: -1
+      tag-groups-to-include:
+        - category
+      tag-groups-to-prefill:
+        - category
+    content-regex: '(.+?)\\n(.+)\\n\\*\\\*\*'
+    
+  image-generation-config:
+    generation-context:
+      - 
+        text-field: body
+        text-filter-regex: '^.+—(.{1,500})\\.'
+        strip-commas: true
+        strengthening-levels: 0
+      - 
+        text-static: stock photo
+        strengthening-levels: 0
+      - 
+        text-static: realistic
+        strengthening-levels: 0
+      - 
+        text-static: news
+        strengthening-levels: 0
+      - 
+        text-static: entry
+        strengthening-levels: 0
+  fields:
+    - 
+      name: image
+      type: image
+      source:
+        generated:
+          generation-index: 0
+    - 
+      name: title
+      type: text
+      source:
+        generated:
+          generation-index: 0
+          generation-group: 1
+    - 
+      name: body
+      type: text
+      source:
+        generated:
+          generation-index: 0
+          generation-group: 2
+  tag-groups:
+    -
+      group: category
+      short-name: cat
+      generation-context-prefix: News Category
+      value-options:
+        - News
+        - Local
+        - Politics
+        - Entertainment
+        - Sports
