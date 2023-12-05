@@ -39,7 +39,7 @@ import aparmar.naisiteengine.templating.CategoryTemplateProvider;
 import aparmar.naisiteengine.templating.CssTemplateProvider;
 import aparmar.naisiteengine.templating.ISpecialTemplateProvider;
 import aparmar.naisiteengine.templating.ITemplateHandler;
-import aparmar.naisiteengine.templating.StarRatingTemplateHandler;
+import aparmar.naisiteengine.templating.StarRatingProvider;
 import aparmar.naisiteengine.templating.TemplateParser;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
@@ -133,11 +133,11 @@ public class NAISiteEngine {
 		specialTemplateProviders.add(new CategoryNameProvider());
 		specialTemplateProviders.add(new CategoryTemplateProvider());
 		specialTemplateProviders.add(new EntryTemplateProvider());
+		specialTemplateProviders.add(new StarRatingProvider());
 		specialTemplateProviders.add(new CategoryPaginationProvider());
 		ArrayList<ITemplateHandler> templateHandlers = new ArrayList<>();
 		templateHandlers.add(new EntryGroupTemplateIdHandler("entry_grid", "entry-preview-grid"));
 		templateHandlers.add(new EntryGroupTemplateIdHandler("entry-list", "entry-preview-list"));
-		templateHandlers.add(new StarRatingTemplateHandler());
 		TemplateParser templateParser = new TemplateParser(
 				"/website-template", config, entryManager,
 				specialTemplateProviders,
