@@ -13,7 +13,7 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-import aparmar.naisiteengine.EntryData;
+import aparmar.naisiteengine.entry.EntryData;
 import aparmar.naisiteengine.templating.TemplateParser.TemplateParsingContext;
 import aparmar.naisiteengine.utils.NaiSiteEngineConstants;
 import aparmar.naisiteengine.utils.NaiSiteEngineUtils;

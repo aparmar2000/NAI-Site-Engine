@@ -1,24 +1,34 @@
 package aparmar.naisiteengine;
 
-import static aparmar.nai.utils.HelperConstants.DINKUS;
 import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.ENTRY_GEN_THREAD_LOGGER;
 
 import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.util.Comparator;
+import java.util.LinkedList;
 import java.util.Map;
+import java.util.Optional;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicBoolean;
+
+import javax.annotation.CheckForNull;
+import javax.annotation.Nullable;
 
 import aparmar.nai.NAIAPI;
 import aparmar.nai.data.request.TextGenModel;
 import aparmar.nai.data.request.TextGenerationParameters;
-import aparmar.nai.data.request.TextGenerationRequest;
 import aparmar.nai.data.request.TextGenerationParameters.LogitBias;
+import aparmar.nai.data.request.TextGenerationRequest;
 import aparmar.nai.data.response.TextGenerationResponse;
 import aparmar.nai.utils.tokenization.TokenizedChunk;
 import aparmar.nai.utils.tokenization.Tokenizers;
+import aparmar.naisiteengine.config.SiteConfigManager;
 import aparmar.naisiteengine.config.UserConfiguration;
+import aparmar.naisiteengine.entry.EntryData;
+import aparmar.naisiteengine.entry.EntryManager;
+import aparmar.naisiteengine.entry.EntryTextGenerationConfig;
+import aparmar.naisiteengine.entry.EntryType;
+import aparmar.naisiteengine.entry.TagGroupData.TagEntry;
 import lombok.RequiredArgsConstructor;
 
 @RequiredArgsConstructor
@@ -27,6 +37,7 @@ public class EntryGenerationManager implements Runnable {
 	private final TextGenerationParameters baseParameters;
 	
 	private final UserConfiguration userConfig;
+	private final SiteConfigManager siteConfigManager;
 	private final EntryManager entryManager;
 	private final ExampleContext contextManager;
 	
@@ -40,22 +51,22 @@ public class EntryGenerationManager implements Runnable {
 		final Random rng = new Random();
 		
 		while (!stopFlag.get()) {
-			Map<String, Integer> unreadCountByCategory = 
-					entryManager.getUnreadGeneratedEntryCountByCategory();
-			int totalUnread = unreadCountByCategory.values().stream()
+			Map<String, Integer> unreadCountByType = 
+					entryManager.getUnreadGeneratedEntryCountByType();
+			int totalUnread = unreadCountByType.values().stream()
 					.mapToInt(Integer::intValue)
 					.sum();
 			while (totalUnread < userConfig.getGenerationConfig().getTargetCacheSize()) {
 				ENTRY_GEN_THREAD_LOGGER.info("Entry cache at "+totalUnread+"/"+targetCacheSize+"; Generating more...");
 				
-				String leastCachedCategory = unreadCountByCategory.entrySet().stream()
+				String leastCachedType = unreadCountByType.entrySet().stream()
 					.min(Comparator.comparingInt(Map.Entry::getValue))
 					.get().getKey();
 				
 				try {
-					EntryData newArticle = generateEntryInCategory(leastCachedCategory, rng.nextInt(5)==0);
+					EntryData newArticle = generateEntryOfType(leastCachedType, rng.nextInt(5)==0);
 					if (newArticle == null) {
-						ENTRY_GEN_THREAD_LOGGER.info("Entry parsing error.");
+						ENTRY_GEN_THREAD_LOGGER.info("Entry generation failed.");
 					} else {
 						entryManager.addGeneratedEntry(newArticle);
 						ENTRY_GEN_THREAD_LOGGER.info("Entry generated, saving...");
@@ -66,9 +77,9 @@ public class EntryGenerationManager implements Runnable {
 				}
 				
 				
-				unreadCountByCategory = 
-						entryManager.getUnreadGeneratedEntryCountByCategory();
-				totalUnread = unreadCountByCategory.values().stream()
+				unreadCountByType = 
+						entryManager.getUnreadGeneratedEntryCountByType();
+				totalUnread = unreadCountByType.values().stream()
 						.mapToInt(Integer::intValue)
 						.sum();
 			}
@@ -79,72 +90,77 @@ public class EntryGenerationManager implements Runnable {
 		ENTRY_GEN_THREAD_LOGGER.info("Entry generation thread stopped.");
 	}
 	
-	private static final int SOFT_MIN_TITLE_LENGTH = 12;
-	private static final int SOFT_MAX_TITLE_LENGTH = 16;
-	private static final int SOFT_MIN_ARTICLE_LENGTH = 128;
-	private static final int SOFT_MAX_ARTICLE_LENGTH = 512;
-	private static final int MAX_RETRIES = 4;
-	private EntryData generateEntryInCategory(String category, boolean useGenerated) throws IOException {
+	private static final int MAX_GENERATION_RETRIES = 2;
+	private EntryData generateEntryOfType(String entryTypeName, boolean useGenerated) throws IOException {
 		long seed = System.currentTimeMillis();
 		
 		TextGenModel textModel = userConfig.getGenerationConfig().getModel();
-		Tokenizers tokenizer = textModel.getTokenizerForModel();
-		TokenizedChunk generatedChunk = new TokenizedChunk(
-				tokenizer, 
-				"[ "+userConfig.getGenerationConfig().getCategoryDescriptor()+": "+category+" ]\n");
+		EntryType entryType = siteConfigManager.getEntryTypeManager().getEntryTypeByName(entryTypeName);
+		
+		EntryData newEntryData = siteConfigManager.createEntry(entryType);
+		for (int i=0;i<entryType.getTextGenerationConfigs().length;i++) {
+			int retries = 0;
+			while (true) {
+				retries++;
+				String generatedText = 
+						generateForTextGenerationConfig(textModel, new TagEntry[0], seed, useGenerated, entryType, i);
+				boolean successfullyPopulated = false;
+				if (generatedText != null) {
+					successfullyPopulated = entryType.populateFieldMapFromTextGen(newEntryData, i, generatedText);
+					break;
+				}
+				
+				if (!successfullyPopulated && retries>=MAX_GENERATION_RETRIES) {
+					ENTRY_GEN_THREAD_LOGGER.debug("\tGeneration failed for index "+i+", retrying... "+retries+"/"+MAX_GENERATION_RETRIES);
+					return null;
+				}
+			}
+		}
+		
+		return newEntryData;
+	}
 
-		LogitBias newlineBias = LogitBias.builder()
-				.sequence(tokenizer.encode("\n"))
-				.bias(0)
-				.ensureSequenceFinishes(false)
-				.unbiasOnceGenerated(true)
-				.build();
-		LogitBias newlineDinkusBias = LogitBias.builder()
-				.sequence(tokenizer.encode("\n"+DINKUS))
+	private static final int MAX_NETWORK_RETRIES = 4;
+	@Nullable
+	@CheckForNull
+	private String generateForTextGenerationConfig(
+			TextGenModel textModel, TagEntry[] tags, long seed, boolean useGenerated,
+			EntryType entryType, int textGenerationConfigIndex) throws IOException {
+		Tokenizers tokenizer = textModel.getTokenizerForModel();
+		EntryTextGenerationConfig textGenerationConfig = entryType.getTextGenerationConfigs()[textGenerationConfigIndex];
+		
+		int[] encodedEndingSequence = tokenizer.encode(textGenerationConfig.getEndingBias());
+		LogitBias endingBias = LogitBias.builder()
+				.sequence(encodedEndingSequence)
 				.bias(0)
 				.ensureSequenceFinishes(true)
 				.unbiasOnceGenerated(true)
-				.build();		
-
-		int generationPhase = 0; // 0-Title, 1-Body
-		int currentPhaseLength = 0;
+				.build();
+		TokenizedChunk generatedChunk = new TokenizedChunk(
+				tokenizer, 
+				TagEntry.toTextGenerationContextForm(tags));
+		
 		int generations = 0;
-		while (!generatedChunk.getTextChunk().contains("\n"+DINKUS)) {
+		while (!textGenerationConfig.getContentMatcher(generatedChunk.getTextChunk()).find()) {
 			TokenizedChunk exampleContextChunk = contextManager.buildContext(
-					category, 
+					tags, textGenerationConfigIndex,
 					baseParameters.getMaxLength()-generatedChunk.tokenLength()-5, 
 					useGenerated, seed);
 			TokenizedChunk fullContext = TokenizedChunk.mergeTokenizedChunks(tokenizer, exampleContextChunk, generatedChunk);
 
 			TextGenerationParameters parameters = baseParameters.toBuilder().build();
-			switch (generationPhase) {
-			case 0:
-				parameters.getStopSequences().add(tokenizer.encode("\n"));
+			if (generatedChunk.textLength() < textGenerationConfig.getTargetMinLength()) {
+				double proportionSatisfied = generatedChunk.textLength()/textGenerationConfig.getTargetMinLength();
+				endingBias.setBias((1-proportionSatisfied) * -1.5);
+			} else if (generatedChunk.textLength() > textGenerationConfig.getTargetMaxLength()*0.75) {
+				double rampLower = textGenerationConfig.getTargetMaxLength()*0.75;
+				double rampUpper = textGenerationConfig.getTargetMaxLength()*0.9;
+				double rampRange = rampUpper - rampLower;
 				
-				if (currentPhaseLength>SOFT_MAX_TITLE_LENGTH) {
-					newlineBias.setBias(1);
-					parameters.getLogitBiases().add(newlineBias);
-				}
-				
-				break;
-			case 1:
-			default:
-				double biasScale = 0;
-				if (currentPhaseLength < SOFT_MIN_ARTICLE_LENGTH) {
-					biasScale = 1 - (currentPhaseLength/((double)SOFT_MIN_ARTICLE_LENGTH));
-					biasScale *= -1;
-				}
-				if (currentPhaseLength > SOFT_MAX_ARTICLE_LENGTH) {
-					biasScale = currentPhaseLength-SOFT_MAX_ARTICLE_LENGTH*0.01;
-					biasScale = Math.min(biasScale, 2);
-				}
-				newlineDinkusBias.setBias(biasScale);
-				
-				parameters.getLogitBiases().add(newlineDinkusBias);
-				parameters.getStopSequences().add(tokenizer.encode("\n"+DINKUS));
-				break;
+				endingBias.setBias((generatedChunk.textLength()-rampLower)/rampRange * 1.2);
 			}
-
+			parameters.setLogitBiases(Optional.ofNullable(parameters.getLogitBiases()).orElse(new LinkedList<>()));
+			parameters.getLogitBiases().add(endingBias);
 			
 			TextGenerationResponse latestGeneration = null;
 			int retries = 0;
@@ -158,29 +174,30 @@ public class EntryGenerationManager implements Runnable {
 							.build());
 					break;
 				} catch (SocketTimeoutException e) {
-					if (retries>=MAX_RETRIES) {
+					if (retries>=MAX_NETWORK_RETRIES) {
 						throw e;
 					}
-					ENTRY_GEN_THREAD_LOGGER.debug("Request timeout, retrying... "+retries+"/"+MAX_RETRIES);
+					ENTRY_GEN_THREAD_LOGGER.debug("\tRequest timeout, retrying... "+retries+"/"+MAX_NETWORK_RETRIES);
 				}
 			}
 			
-			currentPhaseLength += latestGeneration.getOutput().tokenLength();
-			switch (generationPhase) {
-			case 0:
-				if (latestGeneration.getOutput().getTextChunk().contains("\n")) {
-					generationPhase = 1;
-					currentPhaseLength = 0;
-				}
-				break;
-			}
 			generatedChunk.appendTokenizedChunk(latestGeneration.getOutput());
 			
+			if (generatedChunk.textLength() > textGenerationConfig.getTargetMaxLength()) {
+				ENTRY_GEN_THREAD_LOGGER.info("\tEntry-in-progress too long ("+generatedChunk.textLength()+"/"+textGenerationConfig.getTargetMinLength()+"), discarded.");
+				return null;
+			}
+			
 			generations++;
-			ENTRY_GEN_THREAD_LOGGER.info("\tGenerating '"+category+"' entry... (step "+generations+", phase "+generationPhase+", length "+String.format("%,d", generatedChunk.getTokens().length)+")");
+			ENTRY_GEN_THREAD_LOGGER.info("\tGenerating '"+entryType.getName()+"' entry... (step "+generations+", length "+String.format("%,d", generatedChunk.getTokens().length)+")");
 		}
 		
-		return EntryData.loadFromString(generatedChunk.getTextChunk());
+		if (generatedChunk.textLength() < textGenerationConfig.getTargetMinLength()) {
+			ENTRY_GEN_THREAD_LOGGER.info("\tGenerated entry too short ("+generatedChunk.textLength()+"/"+textGenerationConfig.getTargetMinLength()+"), discarded.");
+			return null;
+		}
+		
+		return generatedChunk.getTextChunk();
 	}
 	
 	public void stop() { stopFlag.set(true); }

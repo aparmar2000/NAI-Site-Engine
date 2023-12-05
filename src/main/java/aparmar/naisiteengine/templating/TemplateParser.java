@@ -15,8 +15,8 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.io.IOUtils;
 
-import aparmar.naisiteengine.EntryManager;
 import aparmar.naisiteengine.config.UserConfiguration;
+import aparmar.naisiteengine.entry.EntryManager;
 import aparmar.naisiteengine.utils.NaiSiteEngineUtils;
 import lombok.AllArgsConstructor;
 import lombok.Data;

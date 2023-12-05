@@ -8,8 +8,8 @@ import java.util.Set;
 
 import com.google.common.collect.ImmutableSet;
 
-import aparmar.naisiteengine.EntryManager;
-import aparmar.naisiteengine.EntryData;
+import aparmar.naisiteengine.entry.EntryData;
+import aparmar.naisiteengine.entry.EntryManager;
 import aparmar.naisiteengine.templating.TemplateParser.TemplateParsingContext;
 import aparmar.naisiteengine.utils.NaiSiteEngineConstants;
 
