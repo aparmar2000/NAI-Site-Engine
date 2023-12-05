@@ -40,11 +40,11 @@ public class EntryImageGenerationManager implements Runnable {
 		
 		while (!stopFlag.get()) {
 			if (userConfig.getGenerationConfig().isImageGenerationEnabled()) {
-				Optional<EntryData> imagelessArticleOptional = Arrays.stream(entryManager.getGeneratedEntries())
+				Optional<EntryData> imagelessEntryOptional = Arrays.stream(entryManager.getGeneratedEntries())
 						.filter(EntryData::hasImagesToGenerate)
 						.findAny();
-				if (imagelessArticleOptional.isPresent()) {
-					EntryData imagelessArticle = imagelessArticleOptional.get();
+				if (imagelessEntryOptional.isPresent()) {
+					EntryData imagelessArticle = imagelessEntryOptional.get();
 					HashMap<Integer, List<EntryFieldConfig>> emptyImageFieldMap = 
 							Arrays.stream(imagelessArticle.getEntryType().getEntryFieldConfigs())
 								.filter(f->f.getType()==EntryFieldType.IMAGE)
