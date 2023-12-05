@@ -3,22 +3,3 @@ generation:
   target-cache-size: 16
   model: Kayra
   image-generation: true
-  text-context:
-    tags:
-      - satire
-      - article
-      - news
-    genres:
-      - Article
-    styles:
-      - formal
-      - advanced
-      - professional
-    category-descriptor: News Category
-website:
-  categories:
-    - News
-    - Local
-    - Politics
-    - Entertainment
-    - Sports

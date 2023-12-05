@@ -1,72 +1,67 @@
 entry:
   name: article
-  text-generation-config:
-    generation-context:
-      tags:
-        - satire
-        - article
-        - news
-      genres:
-        - Article
-      styles:
-        - formal
-        - advanced
-        - professional
-      max-examples: -1
-      tag-groups-to-include:
-        - category
-      tag-groups-to-prefill:
-        - category
-    content-regex: '(.+?)\\n(.+)\\n\\*\\\*\*'
+  filename-field: title
+  text-generation:
+    - 
+      generation-context:
+        tags:
+          - satire
+          - article
+          - news
+        genres:
+          - Article
+        styles:
+          - formal
+          - advanced
+          - professional
+        max-examples: -1
+        entry-string: >-
+          {{special-entry-field name:title}}
+          {{special-entry-field name:body}}
+          ***
+      content-regex: '(.+?)\\n(.+)\\n\\*\\\*\*'
+      target-min-length: 128
+      target-max-length: 512
+      ending-bias: '\n***'
     
-  image-generation-config:
-    generation-context:
-      - 
-        text-field: body
-        text-filter-regex: '^.+—(.{1,500})\\.'
-        strip-commas: true
-        strengthening-levels: 0
-      - 
-        text-static: stock photo
-        strengthening-levels: 0
-      - 
-        text-static: realistic
-        strengthening-levels: 0
-      - 
-        text-static: news
-        strengthening-levels: 0
-      - 
-        text-static: entry
-        strengthening-levels: 0
+  image-generation:
+    -
+      generation-prompt:
+        - 
+          text-field: body
+          text-filter-regex: '^.+—(.{1,500})\\.'
+          strip-commas: true
+          strengthening-levels: 0
+        - 
+          text-static: stock photo
+          strengthening-levels: 0
+        - 
+          text-static: realistic
+          strengthening-levels: 0
+        - 
+          text-static: news
+          strengthening-levels: 0
+        - 
+          text-static: entry
+          strengthening-levels: 0
   fields:
     - 
       name: image
       type: image
       source:
-        generated:
-          generation-index: 0
+        default-value: https://placehold.co/768x512/png
+        generation-index: 0
     - 
       name: title
       type: text
       source:
-        generated:
-          generation-index: 0
-          generation-group: 1
+        generation-index: 0
+        generation-group: 1
     - 
       name: body
       type: text
       source:
-        generated:
-          generation-index: 0
-          generation-group: 2
+        generation-index: 0
+        generation-group: 2
   tag-groups:
-    -
-      group: category
-      short-name: cat
-      generation-context-prefix: News Category
-      value-options:
-        - News
-        - Local
-        - Politics
-        - Entertainment
-        - Sports
+    - category
