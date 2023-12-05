@@ -51,7 +51,7 @@ public class EntryRatingUpdateHttpHandler implements HttpHandler {
 		EntryData updatedEntry = entryManager.getGeneratedEntryById(entryId);
 		if (updatedEntry == null) { throwBadRequest(exchange); return; }
 		
-		updatedEntry.setHalfStarRating(newRating);
+		updatedEntry.setRating(newRating);
 		entryManager.saveExistingGeneratedEntry(updatedEntry.getId());
 		
 		exchange.getResponseSender().close();
