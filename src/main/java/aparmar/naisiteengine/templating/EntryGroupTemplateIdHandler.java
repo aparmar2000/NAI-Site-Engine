@@ -1,7 +1,7 @@
 package aparmar.naisiteengine.templating;
 
 import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_ENTRY_ID;
-import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_CATEGORY;
+import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_TAGS;
 import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_PAGINATION_START;
 
 import java.util.Arrays;
@@ -32,9 +32,9 @@ public class EntryGroupTemplateIdHandler implements ITemplateHandler {
 
 	@Override
 	public String processTemplate(String templateName, String templateHtml, TemplateParsingContext parsingContext) {
-		String currentCategory = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_CATEGORY))
-				.map(de->de.getFirst())
-				.orElse("all");
+		String[] currentTags = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_TAGS))
+				.map(de->de.toArray(new String[0]))
+				.orElse(new String[] {});
 		int startIndex = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_PAGINATION_START))
 				.map(de->de.getFirst())
 				.map(Integer::parseInt)
@@ -45,9 +45,10 @@ public class EntryGroupTemplateIdHandler implements ITemplateHandler {
 				.orElse(-1);
 		
 		LinkedList<Integer> orderedEntryIds = new LinkedList<>();
-		Arrays.stream(parsingContext.getTemplateParser().getEntryManager()
-				.getGeneratedEntriesOfCategoryOrderedByNewest(currentCategory))
+		Arrays.stream(parsingContext.getTemplateParser().getEntryManager().getGeneratedEntries())
+			.filter(e->e.hasAllTags(currentTags))
 			.mapToInt(EntryData::getId)
+			.sorted()
 			.forEachOrdered(orderedEntryIds::add);
 		for(int i=0;i<startIndex&&!orderedEntryIds.isEmpty();i++) { orderedEntryIds.poll(); }
 		
