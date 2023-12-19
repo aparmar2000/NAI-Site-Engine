@@ -8,6 +8,7 @@ import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import aparmar.naisiteengine.entry.EntryFieldConfig.EntryFieldType;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -40,6 +41,7 @@ public class EntryType {
 		if (!contentMatcher.find()) { return false; }
 		
 		Arrays.stream(entryFieldConfigs)
+			.filter(f->f.getType() == EntryFieldType.TEXT)
 			.filter(f->f.getFieldValueConfig().getGenerationConfigIndex()==textGenerationConfigIndex)
 			.filter(f->!f.getTextValueFromRegexMatch(contentMatcher).isEmpty())
 			.forEach(f->entryData.setField(f, f.getTextValueFromRegexMatch(contentMatcher)));
