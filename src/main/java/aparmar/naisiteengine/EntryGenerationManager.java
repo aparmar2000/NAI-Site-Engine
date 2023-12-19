@@ -77,7 +77,7 @@ public class EntryGenerationManager implements Runnable {
 							entryManager.saveGeneratedEntriesToFileSystem();
 						}
 					} catch (IOException e) {
-						e.printStackTrace();
+						ENTRY_GEN_THREAD_LOGGER.error("\t"+e.getLocalizedMessage(), e);
 					}
 					
 					
