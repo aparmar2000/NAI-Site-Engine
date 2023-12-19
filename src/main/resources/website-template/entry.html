@@ -15,13 +15,13 @@
     <div id="entry-container">
         {{special-entry-category}}
         <br>
-        <h1>{{special-entry-title}}</h1>
+        <h1>{{special-entry-field name:title}}</h1>
         <br>
-        {{special-entry-image}}
+        <img src="{{special-entry-field name:image}}" class="entry-image">
         <br>
         <br>
         <div>
-            <p class='entry-body'>{{special-entry-body}}</p>
+            <p class='entry-body'>{{special-entry-field name:body}}</p>
         </div>
         {{template-star-rating enabled:true}}
     </div>
