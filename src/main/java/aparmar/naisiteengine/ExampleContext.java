@@ -71,7 +71,7 @@ public class ExampleContext {
 		EntryData[] orderedBaseExamples = entryManager.getTemplateEntries();// TODO: Sort by shared tags.
 		for (EntryData baseExample : orderedBaseExamples) {
 			
-			TokenizedChunk tokenizedBaseExample = new TokenizedChunk(getTokenizer(), "\n"+baseExample.mergedContextString(templateParser, textGenerationConfigIndex));
+			TokenizedChunk tokenizedBaseExample = new TokenizedChunk(getTokenizer(), baseExample.mergedContextString(templateParser, textGenerationConfigIndex)+"\n");
 			TokenizedChunk mergedChunks = 
 					TokenizedChunk.mergeTokenizedChunks(finalContext, tokenizedBaseExample, baseExamplesChunk);
 			if (mergedChunks.tokenLength()<=baseExampleTokenThreshold) {
@@ -86,7 +86,7 @@ public class ExampleContext {
 			Arrays.sort(orderedGeneratedExamples, Comparator.comparingInt(EntryData::getRating));
 			for (EntryData generatedExample : orderedGeneratedExamples) {
 				
-				TokenizedChunk tokenizedGeneratedExample = new TokenizedChunk(getTokenizer(), "\n"+generatedExample.mergedContextString(templateParser, textGenerationConfigIndex));
+				TokenizedChunk tokenizedGeneratedExample = new TokenizedChunk(getTokenizer(), generatedExample.mergedContextString(templateParser, textGenerationConfigIndex)+"\n");
 				TokenizedChunk mergedChunks = 
 						TokenizedChunk.mergeTokenizedChunks(finalContext, tokenizedGeneratedExample, generatedExamplesChunk);
 				if (mergedChunks.tokenLength()<=baseExampleTokenThreshold+generatedExampleTokenThreshold) {
@@ -96,7 +96,6 @@ public class ExampleContext {
 			finalContext.appendTokenizedChunk(generatedExamplesChunk);
 		}
 		
-		finalContext.appendString("\n");
 		return finalContext;
 	}
 }
