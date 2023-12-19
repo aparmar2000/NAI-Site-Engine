@@ -118,20 +118,15 @@
 		</dependency>
 
 		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-api</artifactId>
-			<version>2.0.9</version>
-		</dependency>
-		<dependency>
-			<groupId>org.slf4j</groupId>
-			<artifactId>slf4j-reload4j</artifactId>
-			<version>2.0.9</version>
+			<groupId>ch.qos.reload4j</groupId>
+			<artifactId>reload4j</artifactId>
+			<version>1.2.25</version>
 		</dependency>
 
 		<dependency>
 			<groupId>com.github.aparmar2000</groupId>
 			<artifactId>JNovelAIAPI</artifactId>
-			<version>develop-SNAPSHOT</version>
+			<version>v1.0.6</version>
 		</dependency>
 		<dependency>
 			<groupId>io.undertow</groupId>
@@ -144,13 +139,16 @@
 			<version>2.15.0</version>
 		</dependency>
 		<dependency>
-			<groupId>org.snakeyaml</groupId>
-			<artifactId>snakeyaml-engine</artifactId>
-			<version>2.7</version>
-		</dependency>
-		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
+		</dependency>
+		<dependency>
+		    <groupId>com.fasterxml.jackson.dataformat</groupId>
+		    <artifactId>jackson-dataformat-yaml</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+		    <artifactId>jackson-datatype-jsr310</artifactId>
 		</dependency>
 	</dependencies>
 </project>
