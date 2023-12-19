@@ -6,18 +6,24 @@ import java.util.Deque;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.Function;
 
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import aparmar.naisiteengine.entry.EntryData;
 import aparmar.naisiteengine.entry.EntryManager;
 import aparmar.naisiteengine.utils.NaiSiteEngineConstants;
 
-public class EntryTemplateProvider implements ISpecialTemplateProvider {
-	public static final String ENTRY_LINK_SPECIAL_KEY = "entry-link";
+public class EntryTemplateFieldProvider implements ISpecialTemplateProvider {
 	public static final String ENTRY_FIELD_SPECIAL_KEY = "entry-field";
 	
 	private static final String ENTRY_FIELD_NAME_PARAM_KEY = "name";
+	
+	private static final Map<String, Function<EntryData,String>> SPECIAL_FIELDS_MAP = ImmutableMap.of(
+			"id", e->Integer.toString(e.getId()),
+			"rating", e->Integer.toString(e.getRating())
+			);
 	
 	@Override
 	public Set<String> getTemplateNames() {
@@ -39,20 +45,23 @@ public class EntryTemplateProvider implements ISpecialTemplateProvider {
 		int entryIdQueryParam = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_ENTRY_ID))
 				.map(Deque::getFirst)
 				.map(Integer::parseInt)
-				.orElse(-1);
+				.orElse(0);
 		int entryId = 1;
 		if (entryIdParam!=null && entryIdParam.matches("^\\d+$")) {
 			entryId = Integer.parseUnsignedInt(entryIdParam);
-		} else if (entryIdQueryParam>=0) {
+		} else if (entryIdQueryParam!=0) {
 			entryId = entryIdQueryParam;
 		} else {
 			return templateName+" parse error: invalid entry-id";
 		}
 		
-		EntryData entryData = entryManager.getGeneratedEntryById(entryId);
-		if (!entryData.getFieldMap().containsKey(entryFieldName)) {
-			return templateName+" parse error: '"+entryFieldName+"' is not a valid field name";
+		EntryData entryData = entryManager.getEntryById(entryId);
+		if (entryData.getFieldMap().containsKey(entryFieldName)) {
+			return entryData.getFieldMap().get(entryFieldName);
 		}
-		return entryData.getFieldMap().get(entryFieldName);
+		if (SPECIAL_FIELDS_MAP.containsKey(entryFieldName)) {
+			return SPECIAL_FIELDS_MAP.get(entryFieldName).apply(entryData);
+		}
+		return templateName+" parse error: '"+entryFieldName+"' is not a valid field name";
 	}
 }
