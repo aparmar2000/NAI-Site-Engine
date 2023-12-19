@@ -1,4 +1,4 @@
-div.article-list {
+div.entry-list {
     display: grid;
     grid-column: 1;
 
@@ -7,7 +7,7 @@ div.article-list {
     padding: 10px;
 }
   
-div.article-list > div.article {
+div.entry-list > div.entry {
     background-color: #22253F;
     text-align: center;
     font-size: larger;
