@@ -1,11 +1,15 @@
 package aparmar.naisiteengine;
 
-import static aparmar.nai.utils.HelperConstants.DINKUS;
 import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.MAIN_THREAD_LOGGER;
 
+import java.awt.BorderLayout;
+import java.awt.EventQueue;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
+
+import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
 
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -22,25 +26,28 @@ import aparmar.nai.data.request.imagen.ImageGenerationRequest.ImageGenModel;
 import aparmar.nai.data.request.imagen.ImageGenerationRequest.QualityTagsLocation;
 import aparmar.nai.data.request.imagen.ImageParameters;
 import aparmar.nai.data.request.imagen.ImageParameters.ImageGenSampler;
+import aparmar.nai.utils.HelperConstants;
 import aparmar.nai.utils.TextParameterPresets;
 import aparmar.naisiteengine.config.SiteConfigManager;
 import aparmar.naisiteengine.config.UserConfiguration;
 import aparmar.naisiteengine.entry.EntryManager;
 import aparmar.naisiteengine.entry.EntryTypeManager;
-import aparmar.naisiteengine.httphandlers.EntryRatingUpdateHttpHandler;
 import aparmar.naisiteengine.httphandlers.CategoryResolvingHttpHandler;
 import aparmar.naisiteengine.httphandlers.DefaultRoutingHttpHandler;
+import aparmar.naisiteengine.httphandlers.EntryRatingUpdateHttpHandler;
 import aparmar.naisiteengine.httphandlers.LocalResourceHttpHandler;
-import aparmar.naisiteengine.templating.EntryGroupTemplateIdHandler;
-import aparmar.naisiteengine.templating.EntryTemplateProvider;
 import aparmar.naisiteengine.templating.CategoryNameProvider;
 import aparmar.naisiteengine.templating.CategoryPaginationProvider;
-import aparmar.naisiteengine.templating.CategoryTemplateProvider;
+import aparmar.naisiteengine.templating.TagListTemplateProvider;
 import aparmar.naisiteengine.templating.CssTemplateProvider;
+import aparmar.naisiteengine.templating.EntryGroupTemplateIdHandler;
+import aparmar.naisiteengine.templating.EntryTemplateProvider;
 import aparmar.naisiteengine.templating.ISpecialTemplateProvider;
 import aparmar.naisiteengine.templating.ITemplateHandler;
 import aparmar.naisiteengine.templating.StarRatingProvider;
 import aparmar.naisiteengine.templating.TemplateParser;
+import aparmar.naisiteengine.ui.JThreadMonitorPanel;
+import aparmar.naisiteengine.utils.NaiSiteEngineConstants;
 import io.undertow.Undertow;
 import io.undertow.server.HttpHandler;
 import io.undertow.server.handlers.CanonicalPathHandler;
@@ -48,23 +55,52 @@ import io.undertow.server.handlers.error.SimpleErrorPageHandler;
 import lombok.Getter;
 
 public class NAISiteEngine {
-	private static final ObjectMapper mapper = new ObjectMapper();
+	private static final ObjectMapper mapper = NaiSiteEngineConstants.OBJECT_MAPPER;
 	
 	@Getter
 	private static EntryTypeManager entryTypeManager = null;
-	
+
+	private JFrame frame;
+
+	/**
+	 * Launch the application.
+	 * @throws IOException 
+	 */
 	public static void main(String[] args) throws IOException {
+		NAISiteEngine engine = new NAISiteEngine();
+		EventQueue.invokeLater(new Runnable() {
+			public void run() {
+				try {
+					engine.frame.setVisible(true);
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+		});
+		
+		engine.initializeSystem();
+	}
+
+	/**
+	 * Create the application.
+	 * @throws IOException 
+	 */
+	public NAISiteEngine() throws IOException {
+		initializeFrame();
+	}
+	
+	private void initializeSystem() throws IOException {
 		UserConfiguration config = loadGeneralConfigFile();
 		
 		if (config.getGenerationConfig().getApiKey() == null 
 				|| config.getGenerationConfig().getApiKey().isEmpty()
-				|| config.getGenerationConfig().getApiKey().matches(null)) {
+				|| !config.getGenerationConfig().getApiKey().matches(HelperConstants.PERSISTENT_KEY_REGEX)) {
 			MAIN_THREAD_LOGGER.error("Configuration file does not have a valid NovelAI persistent key!");
 			return;
 		}
 		NAIAPI nai = new NAIAPI(config.getGenerationConfig().getApiKey());
 		
-		SiteConfigManager siteConfigManager = new SiteConfigManager(new File("/config"), config);
+		SiteConfigManager siteConfigManager = new SiteConfigManager(new File("./config"), config);
 
 		TextGenerationParameters parameterPreset = 
 				TextParameterPresets.getPresetByNameAndModel(TextGenModel.KAYRA, "Fresh Coffee");
@@ -85,15 +121,21 @@ public class NAISiteEngine {
 				.build();
 
 		MAIN_THREAD_LOGGER.info("Initializing entryManager...");
-		EntryManager entryManager = new EntryManager(new File("entries"), config);
+		EntryManager entryManager = new EntryManager(new File("entries"), siteConfigManager, config);
 		MAIN_THREAD_LOGGER.info(entryManager.getTemplateEntryCount()+" template entries loaded");
 		MAIN_THREAD_LOGGER.info("Template entries per category: "+entryManager.getTemplateEntryCountByTag());
-		MAIN_THREAD_LOGGER.info(entryManager.getGeneratedEntryCount()+" generated entrys loaded");
+		MAIN_THREAD_LOGGER.info(entryManager.getGeneratedEntryCount()+" generated entries loaded");
 		MAIN_THREAD_LOGGER.info("Generated entries per category: "+entryManager.getGeneratedEntryCountByTag());
-		ExampleContext exampleContext = initExampleContext(parameterPreset, config, entryManager);
+		
+		TemplateParser templateParser = initTemplateParser(config, siteConfigManager, entryManager);
+		ExampleContext exampleContext = new ExampleContext(
+				entryManager,
+				templateParser,
+				TextGenModel.KAYRA.getTokenizerForModel(),
+				8192);
 		
 		MAIN_THREAD_LOGGER.info("Starting entry generation thread...");
-		EntryGenerationManager entryGenerationManager = new EntryGenerationManager(nai, parameterPreset, config, entryManager, exampleContext);
+		EntryGenerationManager entryGenerationManager = new EntryGenerationManager(nai, parameterPreset, config, siteConfigManager, entryManager, exampleContext);
 		Thread entryGenerationThread = new Thread(entryGenerationManager);
 		entryGenerationThread.start();
 		
@@ -102,15 +144,33 @@ public class NAISiteEngine {
 		Thread entryImageGenerationThread = new Thread(entryImageGenerationManager);
 		entryImageGenerationThread.start();
 		
-		while (entryManager.getGeneratedEntryCount() < Math.min(
-				4, 
-				config.getGenerationConfig().getTargetCacheSize())) {
-			try { Thread.sleep(1000); } catch (InterruptedException e) { }
+		int minCacheSize = Math.min(4, config.getGenerationConfig().getTargetCacheSize());
+		while (entryManager.getGeneratedEntryCount() < minCacheSize) {
+			MAIN_THREAD_LOGGER.info("Entry cache at "+entryManager.getGeneratedEntryCount()+", wating to reach a minimum of "+minCacheSize);
+			try { Thread.sleep(5000); } catch (InterruptedException e) { }
 		}
 		
-		Undertow server = initWebServer(config, entryManager);
+		Undertow server = initWebServer(config, templateParser, entryManager);
 		MAIN_THREAD_LOGGER.info("Starting web server...");
         server.start();
+	}
+
+	private static TemplateParser initTemplateParser(UserConfiguration userConfig, SiteConfigManager siteConfig, EntryManager entryManager) {
+		ArrayList<ISpecialTemplateProvider> specialTemplateProviders = new ArrayList<>();
+		specialTemplateProviders.add(new CssTemplateProvider());
+		specialTemplateProviders.add(new CategoryNameProvider());
+		specialTemplateProviders.add(new EntryTemplateProvider());
+		specialTemplateProviders.add(new StarRatingProvider());
+		specialTemplateProviders.add(new CategoryPaginationProvider());
+		specialTemplateProviders.add(new TagListTemplateProvider());
+		ArrayList<ITemplateHandler> templateHandlers = new ArrayList<>();
+		templateHandlers.add(new EntryGroupTemplateIdHandler("entry_grid", "entry-preview-grid"));
+		templateHandlers.add(new EntryGroupTemplateIdHandler("entry-list", "entry-preview-list"));
+		return new TemplateParser(
+				"/website-template",
+				userConfig, siteConfig, entryManager,
+				specialTemplateProviders,
+				templateHandlers);
 	}
 
 	private static UserConfiguration loadGeneralConfigFile() throws IOException, StreamReadException, DatabindException {
@@ -126,25 +186,11 @@ public class NAISiteEngine {
 		return config;
 	}
 
-	private static Undertow initWebServer(UserConfiguration config, EntryManager entryManager) {
+	private static Undertow initWebServer(UserConfiguration config, TemplateParser templateParser, EntryManager entryManager) {
 		MAIN_THREAD_LOGGER.info("Configuring web server...");
-		ArrayList<ISpecialTemplateProvider> specialTemplateProviders = new ArrayList<>();
-		specialTemplateProviders.add(new CssTemplateProvider());
-		specialTemplateProviders.add(new CategoryNameProvider());
-		specialTemplateProviders.add(new CategoryTemplateProvider());
-		specialTemplateProviders.add(new EntryTemplateProvider());
-		specialTemplateProviders.add(new StarRatingProvider());
-		specialTemplateProviders.add(new CategoryPaginationProvider());
-		ArrayList<ITemplateHandler> templateHandlers = new ArrayList<>();
-		templateHandlers.add(new EntryGroupTemplateIdHandler("entry_grid", "entry-preview-grid"));
-		templateHandlers.add(new EntryGroupTemplateIdHandler("entry-list", "entry-preview-list"));
-		TemplateParser templateParser = new TemplateParser(
-				"/website-template", config, entryManager,
-				specialTemplateProviders,
-				templateHandlers);
 		
 		ArrayList<LocalResourceHttpHandler.RedirectEntry> redirectEntries = new ArrayList<>();
-		redirectEntries.add(new LocalResourceHttpHandler.RedirectEntry("/entrys", "entrys/generated", false));
+		redirectEntries.add(new LocalResourceHttpHandler.RedirectEntry("/entries", "entries/generated", false));
 		
 		SimpleErrorPageHandler errorPageHandler = new SimpleErrorPageHandler();
 		LocalResourceHttpHandler localResourceHandler = new LocalResourceHttpHandler(
@@ -165,18 +211,25 @@ public class NAISiteEngine {
 		return server;
 	}
 
-	private static ExampleContext initExampleContext(
-			TextGenerationParameters parameterPreset,
-			UserConfiguration config,
-			EntryManager entryManager) {
-		ExampleContext exampleContext = new ExampleContext(
-				entryManager,
-				TextGenModel.KAYRA.getTokenizerForModel(),
-				8192);
-		exampleContext.setMemoryText(config.getGenerationConfig().getMemoryText()+"\n"+DINKUS);
+	/**
+	 * Initialize the contents of the frame.
+	 */
+	private void initializeFrame() {
+		frame = new JFrame();
+		frame.setBounds(100, 100, 450, 300);
+		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		
-//		System.out.println(exampleContext.buildContext("all", 500).getTextChunk());
-		return exampleContext;
+		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		frame.getContentPane().add(tabbedPane, BorderLayout.CENTER);
+		
+		JThreadMonitorPanel coreThreadPanel = new JThreadMonitorPanel(MAIN_THREAD_LOGGER);
+		tabbedPane.addTab("Core Thread", null, coreThreadPanel, null);
+		
+		JThreadMonitorPanel textThreadPanel = new JThreadMonitorPanel(NaiSiteEngineConstants.ENTRY_GEN_THREAD_LOGGER);
+		tabbedPane.addTab("Text Thread", null, textThreadPanel, null);
+		
+		JThreadMonitorPanel imageThreadPanel = new JThreadMonitorPanel(NaiSiteEngineConstants.IMAGE_GEN_THREAD_LOGGER);
+		tabbedPane.addTab("Image Thread", null, imageThreadPanel, null);
 	}
 
 }
