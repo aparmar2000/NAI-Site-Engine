@@ -14,8 +14,10 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import aparmar.naisiteengine.config.SiteConfigManager;
 import aparmar.naisiteengine.entry.EntryFieldConfig.EntryFieldType;
 import aparmar.naisiteengine.templating.TemplateParser;
+import lombok.AccessLevel;
 import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
@@ -27,12 +29,14 @@ public class EntryData {
 	private String entryTypeName;
 	@Setter
 	private transient SiteConfigManager siteConfigManager;
+	@Getter(value = AccessLevel.PRIVATE)
+	private transient Object entryTypeLock = new Object();
 	private transient EntryType entryType;
 	@JsonProperty(required=false)
 	private int id;
 	@JsonProperty(value="creation-timestamp", required=false)
 	private LocalDateTime creationDateTime;
-	@JsonProperty(value="creation-timestamp", required=false)
+	@JsonProperty(value="rating", required=false)
 	private int rating;
 
 	@JsonProperty(value="fields", required=true)
@@ -88,10 +92,16 @@ public class EntryData {
 		
 		return filename + (id % 100);
 	}
-	
+
+	public void setEntryType(EntryType newType) {
+		synchronized (entryTypeLock) {
+			entryType = newType;
+			entryTypeName = newType.getName();
+		}
+	}
 	public EntryType getEntryType() {
 		if (entryType == null) {
-			synchronized (entryType) {
+			synchronized (entryTypeLock) {
 				if (entryType == null) {
 					if (siteConfigManager == null) { return null;}
 					entryType = siteConfigManager.getEntryTypeManager().getEntryTypeByName(entryTypeName);
@@ -107,4 +117,8 @@ public class EntryData {
 	
 	public void setField(String fieldName, String newVal) { fieldMap.put(fieldName, newVal); }	
 	public void setField(EntryFieldConfig fieldConfig, String newVal) { setField(fieldConfig.getName(), newVal); }
+	
+	public boolean hasAllTags(String[] requiredTags) {
+		return Arrays.asList(tags).containsAll(Arrays.asList(requiredTags));
+	}
 }
