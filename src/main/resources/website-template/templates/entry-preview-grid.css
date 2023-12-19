@@ -1,14 +1,14 @@
-.article-image {
+.entry-image {
     max-width: 100%;
     height: 50%;
 }
-.article-category {
+.entry-category {
     font-variant: small-caps;
     font-weight: bold;
     color: #9773FF;
 }
 
-div.article-grid-listing .rate > label:before {
+div.entry-grid-listing .rate > label:before {
     font-size: 1.4rem;
     padding: .15rem .1rem;
 }

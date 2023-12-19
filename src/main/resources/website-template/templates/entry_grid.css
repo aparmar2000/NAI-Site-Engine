@@ -1,4 +1,4 @@
-div.article-grid {
+div.entry-grid {
     display: grid;
     grid-template-areas: 
         'latest latest . .'
@@ -11,21 +11,21 @@ div.article-grid {
     padding: 10px;
 }
   
-div.article-grid > div.article {
+div.entry-grid > div.entry {
     background-color: #22253F;
     text-align: center;
     font-size: larger;
     padding: 20px;
 }
 
-div.article-grid > div.article img.article-image {
+div.entry-grid > div.entry img.entry-image {
     width: 80%;
 }
   
-div.article-grid .latest-article {
+div.entry-grid .latest-entry {
     grid-area: latest;
 }
   
-div.article-grid .wide-article {
+div.entry-grid .wide-entry {
     grid-area: wide;
 }
