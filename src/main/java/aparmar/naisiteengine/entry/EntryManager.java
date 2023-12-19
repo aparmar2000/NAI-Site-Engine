@@ -1,5 +1,7 @@
 package aparmar.naisiteengine.entry;
 
+import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.MAIN_THREAD_LOGGER;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -15,33 +17,38 @@ import java.util.Objects;
 import java.util.Random;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.IOUtils;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import aparmar.naisiteengine.config.SiteConfigManager;
 import aparmar.naisiteengine.config.UserConfiguration;
 import aparmar.naisiteengine.entry.EntryFieldConfig.EntryFieldType;
 import aparmar.naisiteengine.entry.TagGroupData.TagEntry;
+import aparmar.naisiteengine.utils.NaiSiteEngineConstants;
 import lombok.Getter;
 
 public class EntryManager {
 	public static final String TEMPLATE_ENTRY_FOLDER_NAME = "templates";
 	public static final String SPECIAL_ALL_TAG_STRING = "all";
 	
-	private static final ObjectMapper mapper = new ObjectMapper();
+	private static final ObjectMapper mapper = NaiSiteEngineConstants.OBJECT_MAPPER;
 	
 	@Getter
 	private File rootEntryDirectory, templateEntryDirectory, generatedEntryDirectory;
 	private final SiteConfigManager siteConfigManager;
 	private final UserConfiguration config;
 	
-	private EntryData[] templateEntries = new EntryData[0];
+	private final HashMap<Integer, EntryData> templateEntries = new HashMap<>();
 	private final HashMap<String, List<EntryData>> templateEntriesByType = new HashMap<>();
 	
 	private final HashMap<Integer, EntryData> generatedEntries = new HashMap<>();
 	private final HashMap<String, List<EntryData>> generatedEntriesByTag = new HashMap<>();
 	private final HashMap<String, List<EntryData>> generatedEntriesByType = new HashMap<>();
 	
-	private final AtomicInteger idCounter = new AtomicInteger(1);
+	private final AtomicInteger templateIdCounter = new AtomicInteger(-1);
+	private final AtomicInteger generatedIdCounter = new AtomicInteger(1);
 	
 	public EntryManager(File rootEntryDirectory, SiteConfigManager siteConfigManager, UserConfiguration config) throws IOException {
 		this.siteConfigManager = siteConfigManager;
@@ -59,6 +66,9 @@ public class EntryManager {
 		}
 		if (!templateEntryDirectory.exists()) {
 			templateEntryDirectory.mkdir();
+			MAIN_THREAD_LOGGER.info("Template entry folder not found, creating and writing example...");
+			byte[] templateData = IOUtils.resourceToByteArray("/example-entry.yaml");
+			FileUtils.writeByteArrayToFile(templateEntryDirectory.toPath().resolve("example-entry.yaml").toFile(), templateData);
 		}
 		
 		generatedEntryDirectory = rootEntryDirectory.toPath().resolve("generated").toFile();
@@ -73,12 +83,14 @@ public class EntryManager {
 	}
 	
 	public void reloadEntriesFromFileSystem() {
-		templateEntries = Arrays.stream(templateEntryDirectory.listFiles())
-			.filter(File::isFile)
-			.filter(f->f.getName().endsWith(".yaml") || f.getName().endsWith(".yml"))
-			.map(f->loadEntryData(f, false))
-			.filter(Objects::nonNull)
-			.toArray(EntryData[]::new);
+		templateEntries.clear();
+		templateEntriesByType.clear();
+		for (File file : templateEntryDirectory.listFiles()) {
+			if (!file.isFile()) { continue; }
+			if (!file.getName().endsWith(".yaml")) { continue; }
+			
+			loadEntryData(file, false);
+		}
 
 		generatedEntries.clear();
 		generatedEntriesByTag.clear();
@@ -95,16 +107,19 @@ public class EntryManager {
 		try {
 			loadedEntry = mapper.readValue(inFile, EntryData.class);
 			loadedEntry.setSiteConfigManager(siteConfigManager);
-			
+
+			final int loadedId = loadedEntry.getId();
 			if (isGenerated) {
-				final int loadedId = loadedEntry.getId();
-				idCounter.getAndUpdate(i->Math.max(i, loadedId));
+				generatedIdCounter.getAndUpdate(i->Math.max(i, loadedId));
 				addGeneratedEntry(loadedEntry);
 				
 				generatedEntriesByType
 					.getOrDefault(loadedEntry.getEntryTypeName(), new LinkedList<>())
 					.add(loadedEntry);
 			} else {
+				loadedEntry.setId(templateIdCounter.getAndDecrement());
+				templateEntries.put(loadedEntry.getId(), loadedEntry);
+				
 				templateEntriesByType
 					.getOrDefault(loadedEntry.getEntryTypeName(), new LinkedList<>())
 					.add(loadedEntry);
@@ -161,7 +176,7 @@ public class EntryManager {
 
 	public void addGeneratedEntry(EntryData entryData) {
 		while (entryData.getId()<=0 || generatedEntries.containsKey(entryData.getId())) {
-			entryData.setId(idCounter.getAndIncrement());
+			entryData.setId(generatedIdCounter.getAndIncrement());
 		}
 		generatedEntries.put(entryData.getId(), entryData);
 		
@@ -174,7 +189,8 @@ public class EntryManager {
 	}
 	
 	public EntryData[] getTemplateEntries() {
-		return templateEntries.clone();
+		return templateEntries.values().stream()
+				.toArray(EntryData[]::new);
 	}
 
 	public EntryData[] getGeneratedEntries() {
@@ -186,7 +202,13 @@ public class EntryManager {
 				.filter(entry->entry.getRating()>0)
 				.toArray(EntryData[]::new);
 	}
-	
+
+	public EntryData getEntryById(int id) {
+		return generatedEntries.getOrDefault(Integer.valueOf(id), templateEntries.get(Integer.valueOf(id)));
+	}
+	public EntryData getTemplateEntryById(int id) {
+		return templateEntries.get(Integer.valueOf(id));
+	}
 	public EntryData getGeneratedEntryById(int id) {
 		return generatedEntries.get(Integer.valueOf(id));
 	}
@@ -198,7 +220,7 @@ public class EntryManager {
 		return idArray[rng.nextInt(idArray.length)];
 	}
 	
-	public int getTemplateEntryCount() { return templateEntries.length; }
+	public int getTemplateEntryCount() { return templateEntries.size(); }
 	public Map<String, Integer> getTemplateEntryCountByTag() {
 		HashMap<String, Integer> countMap = new HashMap<>();
 		Arrays.stream(siteConfigManager.getTagGroupManager().getTagGroups())
@@ -207,7 +229,7 @@ public class EntryManager {
 			.map(TagEntry::getName)
 			.forEach(t->countMap.put(t, 0));
 		
-		for (EntryData templateEntry : templateEntries) {
+		for (EntryData templateEntry : templateEntries.values()) {
 			for (String tag : templateEntry.getTags()) {
 				countMap.merge(tag, 1, (a,b)->a+b);
 			}
@@ -243,7 +265,7 @@ public class EntryManager {
 			.forEach(t->countMap.put(t, 0));
 		
 		for (EntryData generatedEntry : generatedEntries.values()) {
-			if (generatedEntry.getRating()<0) { continue; }
+			if (generatedEntry.getRating()>=0) { continue; }
 			countMap.merge(generatedEntry.getEntryTypeName(), 1, (a,b)->a+b);
 		}
 		
