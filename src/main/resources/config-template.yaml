@@ -1,5 +1,5 @@
 generation:
   novelai-api-key: pst-key-goes-here
   target-cache-size: 16
-  model: Kayra
+  model: KAYRA
   image-generation: true
