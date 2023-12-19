@@ -1,8 +1,8 @@
-<a href="{{special-entry-link}}">
+<a href="entry.html?entryId={{special-entry-field name:id}}">
     <div class="entry-list-listing">
-        {{special-entry-image}}
+        <img src="{{special-entry-field name:image}}" class="entry-image">
         {{special-entry-category}}
-        <h3>{{special-entry-title}}</h3>
+        <h3>{{special-entry-field name:title}}</h3>
         <p class='entry-snippet'>{{special-entry-snippet}}</p>
         {{template-star-rating enabled:false}}
     </div>
