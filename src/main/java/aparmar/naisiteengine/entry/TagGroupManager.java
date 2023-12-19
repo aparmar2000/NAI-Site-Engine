@@ -8,12 +8,15 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Objects;
 
+import javax.annotation.Nullable;
+
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 import aparmar.naisiteengine.entry.TagGroupData.TagEntry;
+import aparmar.naisiteengine.utils.NaiSiteEngineConstants;
 
 public class TagGroupManager {
-	private static final ObjectMapper mapper = new ObjectMapper();
+	private static final ObjectMapper mapper = NaiSiteEngineConstants.OBJECT_MAPPER;
 	
 	private final HashMap<String, TagGroupData> tagGroups = new HashMap<>();
 	private final HashMap<String, TagEntry> tagMap = new HashMap<>();
@@ -52,6 +55,7 @@ public class TagGroupManager {
 	}
 
 	public TagGroupData[] getTagGroups() { return tagGroups.values().toArray(new TagGroupData[0]); }
+	@Nullable
 	public TagGroupData getTagGroupByName(String name) { return tagGroups.get(name); }
 	
 	public TagEntry getTagByName(String name) { return tagMap.get(name); }

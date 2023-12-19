@@ -10,8 +10,10 @@ import java.util.Objects;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 
+import aparmar.naisiteengine.utils.NaiSiteEngineConstants;
+
 public class EntryTypeManager {
-	private static final ObjectMapper mapper = new ObjectMapper();
+	private static final ObjectMapper mapper = NaiSiteEngineConstants.OBJECT_MAPPER;
 	
 	private final HashMap<String, EntryType> entryTypes = new HashMap<>();
 	
