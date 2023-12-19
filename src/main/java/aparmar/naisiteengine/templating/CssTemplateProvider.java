@@ -27,10 +27,11 @@ public class CssTemplateProvider implements ISpecialTemplateProvider {
 	@Override
 	public void initializeData(TemplateParser.TemplateParsingContext parsingContext) {
 		Matcher nameMatcher = EXTRACT_NAME_REGEX.matcher(parsingContext.getCurrentRelativePath());
-		nameMatcher.find();
 
 		tryAddCssAtLoc(parsingContext, "", "root");
-		tryAddCssAtLoc(parsingContext, "", nameMatcher.group(1));
+		if (nameMatcher.find()) {
+			tryAddCssAtLoc(parsingContext, "", nameMatcher.group(1));
+		}
 	}
 	
 	@Override
