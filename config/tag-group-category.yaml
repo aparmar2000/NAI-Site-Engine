@@ -1,0 +1,10 @@
+group-name: category
+short-name: cat
+generation-context-prefix: News Category
+max-selected-values: 1
+value-options:
+  - News
+  - Local
+  - Politics
+  - Entertainment
+  - Sports
