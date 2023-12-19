@@ -6,6 +6,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
+import java.util.concurrent.ThreadLocalRandom;
 import java.util.function.Function;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -64,6 +66,20 @@ public class NaiSiteEngineUtils {
 			.forEach(pair->result.put(pair[0], pair[1]));
 		
 		return result;
+	}
+	
+	// Durstenfeld shuffle
+	public static <T> void shuffleArray(T[] arr, Random rng) {
+		for (int i = arr.length - 1; i > 0; i--) {
+			int index = rng.nextInt(i + 1);
+			
+			T a = arr[index];
+			arr[index] = arr[i];
+			arr[i] = a;
+		}
+	}
+	public static <T> void shuffleArray(T[] arr) {
+		shuffleArray(arr, ThreadLocalRandom.current());
 	}
 
 }
