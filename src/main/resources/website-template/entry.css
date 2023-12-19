@@ -9,11 +9,6 @@
     width: 80%;
     float: unset;
 }
-#entry-container .entry-category {
-    font-variant: small-caps;
-    font-weight: bold;
-    color: #9773FF;
-}
 #entry-container p.entry-body {
     line-height: 1.6;
     font-size: larger;
