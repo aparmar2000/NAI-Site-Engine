@@ -154,6 +154,7 @@ public class NAISiteEngine {
 		Undertow server = initWebServer(config, templateParser, entryManager);
 		MAIN_THREAD_LOGGER.info("Starting web server...");
         server.start();
+		MAIN_THREAD_LOGGER.info("Server started and available at localhost:8087");
 	}
 
 	private static TemplateParser initTemplateParser(UserConfiguration userConfig, SiteConfigManager siteConfig, EntryManager entryManager) {
