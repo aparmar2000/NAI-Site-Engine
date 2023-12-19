@@ -41,6 +41,7 @@ import aparmar.naisiteengine.templating.CategoryPaginationProvider;
 import aparmar.naisiteengine.templating.TagListTemplateProvider;
 import aparmar.naisiteengine.templating.CssTemplateProvider;
 import aparmar.naisiteengine.templating.EntryGroupTemplateIdHandler;
+import aparmar.naisiteengine.templating.EntryTagListProvider;
 import aparmar.naisiteengine.templating.EntryTemplateFieldProvider;
 import aparmar.naisiteengine.templating.ISpecialTemplateProvider;
 import aparmar.naisiteengine.templating.ITemplateHandler;
@@ -163,6 +164,7 @@ public class NAISiteEngine {
 		specialTemplateProviders.add(new StarRatingProvider());
 		specialTemplateProviders.add(new CategoryPaginationProvider());
 		specialTemplateProviders.add(new TagListTemplateProvider());
+		specialTemplateProviders.add(new EntryTagListProvider());
 		ArrayList<ITemplateHandler> templateHandlers = new ArrayList<>();
 		templateHandlers.add(new EntryGroupTemplateIdHandler("entry_grid", "entry-preview-grid"));
 		templateHandlers.add(new EntryGroupTemplateIdHandler("entry-list", "entry-preview-list"));
