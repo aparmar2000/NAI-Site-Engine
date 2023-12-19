@@ -8,4 +8,8 @@ import lombok.Data;
 public class UserConfiguration {
 	@JsonProperty("generation")
 	private final GenerationConfiguration generationConfig;
+	
+	public UserConfiguration() {
+		generationConfig = new GenerationConfiguration();
+	}
 }
