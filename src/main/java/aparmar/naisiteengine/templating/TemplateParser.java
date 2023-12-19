@@ -15,6 +15,7 @@ import java.util.concurrent.ThreadLocalRandom;
 
 import org.apache.commons.io.IOUtils;
 
+import aparmar.naisiteengine.config.SiteConfigManager;
 import aparmar.naisiteengine.config.UserConfiguration;
 import aparmar.naisiteengine.entry.EntryManager;
 import aparmar.naisiteengine.utils.NaiSiteEngineUtils;
@@ -26,7 +27,9 @@ public class TemplateParser {
 	@Getter
 	private final String internalRootDirectory;
 	@Getter
-	private final UserConfiguration config;
+	private final UserConfiguration userConfig;
+	@Getter
+	private final SiteConfigManager siteConfig;
 	@Getter
 	private final EntryManager entryManager;
 	private final List<ISpecialTemplateProvider> specialTemplateProviders;
@@ -35,11 +38,13 @@ public class TemplateParser {
 	public static final String SEED_PARAM_KEY = "seed";
 	
 	
-	public TemplateParser(String internalRootDirectory, UserConfiguration config, EntryManager entryManager,
+	public TemplateParser(String internalRootDirectory, 
+			UserConfiguration config, SiteConfigManager siteConfig, EntryManager entryManager,
 			List<ISpecialTemplateProvider> specialTemplateProviders,
 			List<ITemplateHandler> templateHandlers) {
 		this.internalRootDirectory = internalRootDirectory;
-		this.config = config;
+		this.userConfig = config;
+		this.siteConfig = siteConfig;
 		this.entryManager = entryManager;
 		this.specialTemplateProviders = specialTemplateProviders;
 		this.templateHandlers = templateHandlers;
