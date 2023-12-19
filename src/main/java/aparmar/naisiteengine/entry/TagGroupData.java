@@ -35,6 +35,10 @@ public class TagGroupData {
 				.toArray(TagEntry[]::new);
 	}
 	
+	public String[] getTagNames() {
+		return values.clone();
+	}
+	
 	@Data
 	public static class TagEntry {
 		private final String name;
@@ -66,7 +70,9 @@ public class TagGroupData {
 						.collect(Collectors.joining(", ")));
 				result.append(" ]");
 
-				result.append("\n");
+				if (i+1<sortedGroups.length) {
+					result.append("\n");
+				}
 			}
 			
 			return result.toString();
