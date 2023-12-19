@@ -1,0 +1,6 @@
+entry-type: article
+fields:
+  title: 'Example Article'
+  body: 'This is an example of the shape of example entries.'
+tags:
+  - News
