@@ -3,7 +3,7 @@
         <img src="{{special-entry-field name:image}}" class="entry-image">
         {{template-entry-category}}
         <h3>{{special-entry-field name:title}}</h3>
-        <p class='entry-snippet'>{{special-entry-snippet}}</p>
+        <p class='entry-snippet'>{{special-entry-field name:body max-len:60}}</p>
         {{template-star-rating enabled:false}}
     </div>
 </a>
