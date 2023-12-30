@@ -1,10 +1,12 @@
-<a href="entry.html?entryId={{special-entry-field name:id}}">
-    <div class="entry-grid-listing">
+<div class="entry-grid-listing">
+    <a href="entry.html?entryId={{special-entry-field name:id}}">
         <img src="{{special-entry-field name:image}}" class="entry-image">
-        <br>
-        {{template-entry-category}}
+    </a>
+    <br>
+    {{template-entry-category}}
+    <a class="entry-grid-listing-body" href="entry.html?entryId={{special-entry-field name:id}}">
         <h3>{{special-entry-field name:title}}</h3>
         <p class='entry-snippet'>{{special-entry-field name:body max-len:160}}</p>
-        {{template-star-rating enabled:false}}
-    </div>
-</a>
+    </a>
+    {{template-star-rating enabled:false}}
+</div>

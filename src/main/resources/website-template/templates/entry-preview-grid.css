@@ -12,3 +12,8 @@ div.entry-grid-listing .rate > label:before {
     font-size: 1.4rem;
     padding: .15rem .1rem;
 }
+
+a.entry-grid-listing-body {
+    text-decoration: none;
+    color: inherit;
+}

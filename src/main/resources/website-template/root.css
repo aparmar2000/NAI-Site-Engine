@@ -3,6 +3,11 @@ body {
     color: #F7F7F7;
 }
 
+body a div {
+    color: #F7F7F7;
+    text-decoration: none;
+}
+
 .pagination-link {
     color: #75CF67;
     font-weight: bolder;
