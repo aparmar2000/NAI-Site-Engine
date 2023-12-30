@@ -30,6 +30,8 @@ import aparmar.naisiteengine.utils.NaiSiteEngineConstants;
 import lombok.Getter;
 
 public class EntryManager {
+	public static final int INVALID_ENTRY_ID = 0;
+	
 	public static final String TEMPLATE_ENTRY_FOLDER_NAME = "templates";
 	public static final String SPECIAL_ALL_TAG_STRING = "all";
 	
