@@ -32,6 +32,7 @@ public class TemplateParser {
 	private final SiteConfigManager siteConfig;
 	@Getter
 	private final EntryManager entryManager;
+	private final List<ITemplatePreprocessor> templatePreprocessors;
 	private final List<ISpecialTemplateProvider> specialTemplateProviders;
 	private final List<ITemplateHandler> templateHandlers;
 	
@@ -40,12 +41,15 @@ public class TemplateParser {
 	
 	public TemplateParser(String internalRootDirectory, 
 			UserConfiguration config, SiteConfigManager siteConfig, EntryManager entryManager,
+			List<ITemplatePreprocessor> templatePreprocessors,
 			List<ISpecialTemplateProvider> specialTemplateProviders,
 			List<ITemplateHandler> templateHandlers) {
 		this.internalRootDirectory = internalRootDirectory;
 		this.userConfig = config;
 		this.siteConfig = siteConfig;
 		this.entryManager = entryManager;
+		
+		this.templatePreprocessors = templatePreprocessors;
 		this.specialTemplateProviders = specialTemplateProviders;
 		this.templateHandlers = templateHandlers;
 	}
@@ -106,6 +110,11 @@ public class TemplateParser {
 			
 			TemplateParsingContext newParsingContext = parsingContext.copy();
 			newParsingContext.setLayerParameters(modifiedLayerParameters);
+			
+			for (ITemplatePreprocessor templatePreprocessor : templatePreprocessors) {
+				templateHtml = templatePreprocessor
+						.processTemplate(templateName, templateHtml, newParsingContext);
+			}
 			
 			for (ITemplateHandler templateHandler : templateHandlers) {
 				if (!templateHandler.getTemplateNames().contains(templateName)) { continue; }

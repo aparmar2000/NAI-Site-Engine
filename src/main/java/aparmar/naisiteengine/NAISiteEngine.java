@@ -45,6 +45,7 @@ import aparmar.naisiteengine.templating.EntryTagListProvider;
 import aparmar.naisiteengine.templating.EntryTemplateFieldProvider;
 import aparmar.naisiteengine.templating.ISpecialTemplateProvider;
 import aparmar.naisiteengine.templating.ITemplateHandler;
+import aparmar.naisiteengine.templating.ITemplatePreprocessor;
 import aparmar.naisiteengine.templating.StarRatingProvider;
 import aparmar.naisiteengine.templating.TemplateParser;
 import aparmar.naisiteengine.ui.JThreadMonitorPanel;
@@ -158,6 +159,7 @@ public class NAISiteEngine {
 	}
 
 	private static TemplateParser initTemplateParser(UserConfiguration userConfig, SiteConfigManager siteConfig, EntryManager entryManager) {
+		ArrayList<ITemplatePreprocessor> templatePreprocessors = new ArrayList<>();
 		ArrayList<ISpecialTemplateProvider> specialTemplateProviders = new ArrayList<>();
 		specialTemplateProviders.add(new CssTemplateProvider());
 		specialTemplateProviders.add(new CategoryNameProvider());
@@ -172,6 +174,7 @@ public class NAISiteEngine {
 		return new TemplateParser(
 				"/website-template",
 				userConfig, siteConfig, entryManager,
+				templatePreprocessors,
 				specialTemplateProviders,
 				templateHandlers);
 	}
