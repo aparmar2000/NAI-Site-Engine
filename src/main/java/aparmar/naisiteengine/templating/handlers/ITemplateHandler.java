@@ -1,7 +1,9 @@
-package aparmar.naisiteengine.templating;
+package aparmar.naisiteengine.templating.handlers;
 
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import aparmar.naisiteengine.templating.TemplateParser;
 
 public interface ITemplateHandler {
 	public String TEMPLATE_PREFIX = "template-";

@@ -1,7 +1,7 @@
-package aparmar.naisiteengine.templating;
+package aparmar.naisiteengine.templating.providers;
 
-import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_TAGS;
 import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_PAGINATION_START;
+import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_TAGS;
 
 import java.util.Map;
 import java.util.Optional;
@@ -10,6 +10,7 @@ import java.util.Set;
 import com.google.common.collect.ImmutableSet;
 
 import aparmar.naisiteengine.templating.TemplateParser.TemplateParsingContext;
+import aparmar.naisiteengine.utils.LinkBuilder;
 
 public class CategoryPaginationProvider implements ISpecialTemplateProvider {
 	public static final String CATEGORY_PAGINATE_SPECIAL_KEY = "category-paginate";
@@ -33,9 +34,9 @@ public class CategoryPaginationProvider implements ISpecialTemplateProvider {
 	@Override
 	public String provideReplacementString(String templateName, Map<String, String> templateParams,
 			TemplateParsingContext parsingContext) {
-		String currentCategory = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_TAGS))
-				.map(de->de.getFirst())
-				.orElse("all");
+		String[] currentTags = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_TAGS))
+				.map(de->de.toArray(new String[0]))
+				.orElse(new String[] {});
 		int baseStartIndex = Optional.ofNullable(templateParams.get(PAGINATION_START_PROPERTY_KEY))
 				.map(Integer::parseInt)
 				.orElse(0);
@@ -62,8 +63,12 @@ public class CategoryPaginationProvider implements ISpecialTemplateProvider {
 		if (startIndex < 0) {
 			return "<a disabled>"+paginationLinkText+"</a>";
 		}
-		return "<a href=\"category-paginate.html?"+QUERY_PARAM_TAGS+"="+currentCategory+"&"+QUERY_PARAM_PAGINATION_START+"="+startIndex+"\""
-				+ "class=\"pagination-link\">"
+		
+		LinkBuilder lb = new LinkBuilder("category-paginate.html");
+		lb.addMultiValueParam(QUERY_PARAM_TAGS, currentTags);
+		lb.addParam(QUERY_PARAM_PAGINATION_START, startIndex);
+		
+		return "<a href=\""+lb.build()+"\" class=\"pagination-link\">"
 			+ paginationLinkText
 			+ "</a>";
 	}

@@ -1,4 +1,4 @@
-package aparmar.naisiteengine.templating;
+package aparmar.naisiteengine.templating.providers;
 
 import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_TAGS;
 
@@ -16,6 +16,7 @@ import com.google.common.collect.Sets.SetView;
 
 import aparmar.naisiteengine.config.SiteConfigManager;
 import aparmar.naisiteengine.entry.TagGroupData;
+import aparmar.naisiteengine.templating.TemplateParser;
 
 public class TagListTemplateProvider implements ISpecialTemplateProvider {
 	private static final String TAGS_SPECIAL_KEY = "list-tags";

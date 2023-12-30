@@ -1,4 +1,6 @@
-package aparmar.naisiteengine.templating;
+package aparmar.naisiteengine.templating.preprocessors;
+
+import aparmar.naisiteengine.templating.TemplateParser;
 
 public interface ITemplatePreprocessor {
 

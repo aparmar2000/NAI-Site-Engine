@@ -1,4 +1,4 @@
-package aparmar.naisiteengine.templating;
+package aparmar.naisiteengine.templating.providers;
 
 import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_TAGS;
 
@@ -24,7 +24,7 @@ public class CategoryNameProvider implements ISpecialTemplateProvider {
 		String currentCategory = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_TAGS))
 				.map(de->de.getFirst())
 				.map(c->c.substring(0, 1).toUpperCase()+c.substring(1))
-				.orElse("Unknown");
+				.orElse("All");
 		return currentCategory;
 	}
 

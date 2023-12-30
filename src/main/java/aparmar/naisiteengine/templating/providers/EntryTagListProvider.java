@@ -1,4 +1,4 @@
-package aparmar.naisiteengine.templating;
+package aparmar.naisiteengine.templating.providers;
 
 import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_TAGS;
 
@@ -10,6 +10,7 @@ import java.util.stream.Collectors;
 import com.google.common.collect.ImmutableSet;
 
 import aparmar.naisiteengine.entry.EntryData;
+import aparmar.naisiteengine.templating.TemplateParser;
 
 public class EntryTagListProvider extends AbstractEntryTemplateProvider {
 	public static final String ENTRY_TAGS_SPECIAL_KEY = "entry-tags";

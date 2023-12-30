@@ -1,4 +1,4 @@
-package aparmar.naisiteengine.templating;
+package aparmar.naisiteengine.templating.providers;
 
 import java.io.IOException;
 import java.util.HashSet;
@@ -11,6 +11,8 @@ import java.util.stream.Collectors;
 import org.apache.commons.io.IOUtils;
 
 import com.google.common.collect.ImmutableSet;
+
+import aparmar.naisiteengine.templating.TemplateParser;
 
 public class CssTemplateProvider implements ISpecialTemplateProvider {
 	private static final String CSS_SPECIAL_KEY = "css";

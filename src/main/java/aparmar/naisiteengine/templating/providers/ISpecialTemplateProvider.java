@@ -1,8 +1,10 @@
-package aparmar.naisiteengine.templating;
+package aparmar.naisiteengine.templating.providers;
 
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
+
+import aparmar.naisiteengine.templating.TemplateParser;
 
 public interface ISpecialTemplateProvider {
 	public static final String SPECIAL_PREFIX = "special-";

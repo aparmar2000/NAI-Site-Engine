@@ -32,22 +32,21 @@ import aparmar.naisiteengine.config.SiteConfigManager;
 import aparmar.naisiteengine.config.UserConfiguration;
 import aparmar.naisiteengine.entry.EntryManager;
 import aparmar.naisiteengine.entry.EntryTypeManager;
-import aparmar.naisiteengine.httphandlers.CategoryResolvingHttpHandler;
 import aparmar.naisiteengine.httphandlers.DefaultRoutingHttpHandler;
 import aparmar.naisiteengine.httphandlers.EntryRatingUpdateHttpHandler;
 import aparmar.naisiteengine.httphandlers.LocalResourceHttpHandler;
-import aparmar.naisiteengine.templating.CategoryNameProvider;
-import aparmar.naisiteengine.templating.CategoryPaginationProvider;
-import aparmar.naisiteengine.templating.TagListTemplateProvider;
-import aparmar.naisiteengine.templating.CssTemplateProvider;
-import aparmar.naisiteengine.templating.EntryGroupTemplateIdHandler;
-import aparmar.naisiteengine.templating.EntryTagListProvider;
-import aparmar.naisiteengine.templating.EntryTemplateFieldProvider;
-import aparmar.naisiteengine.templating.ISpecialTemplateProvider;
-import aparmar.naisiteengine.templating.ITemplateHandler;
-import aparmar.naisiteengine.templating.ITemplatePreprocessor;
-import aparmar.naisiteengine.templating.StarRatingProvider;
 import aparmar.naisiteengine.templating.TemplateParser;
+import aparmar.naisiteengine.templating.handlers.ITemplateHandler;
+import aparmar.naisiteengine.templating.preprocessors.EntryGroupIdPreprocessor;
+import aparmar.naisiteengine.templating.preprocessors.ITemplatePreprocessor;
+import aparmar.naisiteengine.templating.providers.CategoryNameProvider;
+import aparmar.naisiteengine.templating.providers.CategoryPaginationProvider;
+import aparmar.naisiteengine.templating.providers.CssTemplateProvider;
+import aparmar.naisiteengine.templating.providers.EntryTagListProvider;
+import aparmar.naisiteengine.templating.providers.EntryTemplateFieldProvider;
+import aparmar.naisiteengine.templating.providers.ISpecialTemplateProvider;
+import aparmar.naisiteengine.templating.providers.StarRatingProvider;
+import aparmar.naisiteengine.templating.providers.TagListTemplateProvider;
 import aparmar.naisiteengine.ui.JThreadMonitorPanel;
 import aparmar.naisiteengine.utils.NaiSiteEngineConstants;
 import io.undertow.Undertow;
@@ -160,6 +159,7 @@ public class NAISiteEngine {
 
 	private static TemplateParser initTemplateParser(UserConfiguration userConfig, SiteConfigManager siteConfig, EntryManager entryManager) {
 		ArrayList<ITemplatePreprocessor> templatePreprocessors = new ArrayList<>();
+		templatePreprocessors.add(new EntryGroupIdPreprocessor());
 		ArrayList<ISpecialTemplateProvider> specialTemplateProviders = new ArrayList<>();
 		specialTemplateProviders.add(new CssTemplateProvider());
 		specialTemplateProviders.add(new CategoryNameProvider());
@@ -169,8 +169,8 @@ public class NAISiteEngine {
 		specialTemplateProviders.add(new TagListTemplateProvider());
 		specialTemplateProviders.add(new EntryTagListProvider());
 		ArrayList<ITemplateHandler> templateHandlers = new ArrayList<>();
-		templateHandlers.add(new EntryGroupTemplateIdHandler("entry_grid", "entry-preview-grid"));
-		templateHandlers.add(new EntryGroupTemplateIdHandler("entry-list", "entry-preview-list"));
+//		templateHandlers.add(new EntryGroupTemplateIdHandler("entry_grid", "entry-preview-grid"));
+//		templateHandlers.add(new EntryGroupTemplateIdHandler("entry-list", "entry-preview-list"));
 		return new TemplateParser(
 				"/website-template",
 				userConfig, siteConfig, entryManager,
@@ -205,8 +205,7 @@ public class NAISiteEngine {
 				templateParser, 
 				errorPageHandler);
 		EntryRatingUpdateHttpHandler entryRatingUpdateHttpHandler = new EntryRatingUpdateHttpHandler(entryManager, localResourceHandler);
-		CategoryResolvingHttpHandler categoryResolvingHttpHandler = new CategoryResolvingHttpHandler(entryRatingUpdateHttpHandler);
-		DefaultRoutingHttpHandler defaultRoutingHandler = new DefaultRoutingHttpHandler(categoryResolvingHttpHandler);
+		DefaultRoutingHttpHandler defaultRoutingHandler = new DefaultRoutingHttpHandler(entryRatingUpdateHttpHandler);
 		HttpHandler rootHandler = new CanonicalPathHandler(defaultRoutingHandler);
 
 		MAIN_THREAD_LOGGER.info("Building web server...");

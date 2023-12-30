@@ -1,46 +1,47 @@
-package aparmar.naisiteengine.templating;
+package aparmar.naisiteengine.templating.providers;
 
 import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_ENTRY_ID;
 
 import java.util.Deque;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
+
+import com.google.common.collect.ImmutableSet;
 
 import aparmar.naisiteengine.entry.EntryData;
 import aparmar.naisiteengine.entry.EntryManager;
 import aparmar.naisiteengine.templating.TemplateParser.TemplateParsingContext;
 import aparmar.naisiteengine.utils.NaiSiteEngineConstants;
 
-public abstract class AbstractEntryTemplateProvider implements ISpecialTemplateProvider {
+public class StarRatingProvider implements ISpecialTemplateProvider {
+	public static final String RATING_TEMPLATE_KEY = "entry-rating";
 
 	@Override
-	public String provideReplacementString(String templateName, Map<String, String> templateParams,
-			TemplateParsingContext parsingContext) {
+	public Set<String> getTemplateNames() {
+		return ImmutableSet.of(RATING_TEMPLATE_KEY);
+	}
+
+	@Override
+	public String provideReplacementString(String templateName, Map<String, String> templateParams, TemplateParsingContext parsingContext) {
 		EntryManager entryManager = parsingContext.getTemplateParser().getEntryManager();
-		
+
 		String entryIdParam = parsingContext.getLayerParameters()
 				.get(NaiSiteEngineConstants.LAYER_PARAM_ENTRY_ID);
 		int entryIdQueryParam = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_ENTRY_ID))
 				.map(Deque::getFirst)
 				.map(Integer::parseInt)
-				.orElse(0);
-		int entryId = 1;
+				.orElse(-1);
+		int entryId = 0;
 		if (entryIdParam!=null && entryIdParam.matches("^\\d+$")) {
 			entryId = Integer.parseUnsignedInt(entryIdParam);
-		} else if (entryIdQueryParam!=0) {
+		} else if (entryIdQueryParam>=0) {
 			entryId = entryIdQueryParam;
-		} else {
-			return templateName+" parse error: invalid entry-id";
 		}
-
-		EntryData entryData = entryManager.getEntryById(entryId);
-		if (entryData == null) {
-			return templateName+" parse error: unknown entry-id '"+entryId+"'";
-		}
-		return provideReplacementString(templateName, templateParams, parsingContext, entryData);
+		
+		EntryData currentArticle = entryManager.getGeneratedEntryById(entryId);
+		if (currentArticle == null) { return "ERR: unknown entry id"; }
+		return Integer.toString(currentArticle.getRating());
 	}
-	
-	protected abstract String provideReplacementString(String templateName, Map<String, String> templateParams,
-			TemplateParsingContext parsingContext, EntryData entryData);
 
 }

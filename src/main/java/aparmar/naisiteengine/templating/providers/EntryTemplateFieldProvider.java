@@ -1,4 +1,4 @@
-package aparmar.naisiteengine.templating;
+package aparmar.naisiteengine.templating.providers;
 
 import java.util.Map;
 import java.util.Optional;
@@ -9,6 +9,7 @@ import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 
 import aparmar.naisiteengine.entry.EntryData;
+import aparmar.naisiteengine.templating.TemplateParser;
 
 public class EntryTemplateFieldProvider extends AbstractEntryTemplateProvider {
 	public static final String ENTRY_FIELD_SPECIAL_KEY = "entry-field";
