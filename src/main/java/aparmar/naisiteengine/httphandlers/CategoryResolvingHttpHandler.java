@@ -1,6 +1,6 @@
 package aparmar.naisiteengine.httphandlers;
 
-import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_CATEGORY;
+import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_TAGS;
 
 import java.util.Optional;
 
@@ -14,13 +14,13 @@ public class CategoryResolvingHttpHandler implements HttpHandler {
 
 	@Override
 	public void handleRequest(HttpServerExchange exchange) throws Exception {
-		String currentCategory = Optional.ofNullable(exchange.getQueryParameters().get(QUERY_PARAM_CATEGORY))
+		String currentCategory = Optional.ofNullable(exchange.getQueryParameters().get(QUERY_PARAM_TAGS))
 				.map(de->de.getFirst())
 				.orElse("");
 		if (currentCategory.isEmpty()) {
 			if (exchange.getRelativePath().startsWith("/category.html")
 					|| exchange.getRelativePath().startsWith("/category-paginate.html")) {
-				exchange.addQueryParam(QUERY_PARAM_CATEGORY, "all");
+				exchange.addQueryParam(QUERY_PARAM_TAGS, "all");
 			}
 		}
 		

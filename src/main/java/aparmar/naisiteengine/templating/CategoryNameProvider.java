@@ -1,6 +1,6 @@
 package aparmar.naisiteengine.templating;
 
-import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_CATEGORY;
+import static aparmar.naisiteengine.utils.NaiSiteEngineConstants.QUERY_PARAM_TAGS;
 
 import java.util.Map;
 import java.util.Optional;
@@ -21,7 +21,7 @@ public class CategoryNameProvider implements ISpecialTemplateProvider {
 	@Override
 	public String provideReplacementString(String templateName, Map<String, String> templateParams,
 			TemplateParsingContext parsingContext) {
-		String currentCategory = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_CATEGORY))
+		String currentCategory = Optional.ofNullable(parsingContext.getQueryParameters().get(QUERY_PARAM_TAGS))
 				.map(de->de.getFirst())
 				.map(c->c.substring(0, 1).toUpperCase()+c.substring(1))
 				.orElse("Unknown");
