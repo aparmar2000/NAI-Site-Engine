@@ -169,8 +169,6 @@ public class NAISiteEngine {
 		specialTemplateProviders.add(new TagListTemplateProvider());
 		specialTemplateProviders.add(new EntryTagListProvider());
 		ArrayList<ITemplateHandler> templateHandlers = new ArrayList<>();
-//		templateHandlers.add(new EntryGroupTemplateIdHandler("entry_grid", "entry-preview-grid"));
-//		templateHandlers.add(new EntryGroupTemplateIdHandler("entry-list", "entry-preview-list"));
 		return new TemplateParser(
 				"/website-template",
 				userConfig, siteConfig, entryManager,
