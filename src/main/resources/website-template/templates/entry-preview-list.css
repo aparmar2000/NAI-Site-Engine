@@ -13,3 +13,8 @@ div.entry-list-listing .rate > label:before {
     font-size: 1rem;
     padding: .15rem .1rem;
 }
+
+a.entry-list-listing-body {
+    text-decoration: none;
+    color: inherit;
+}

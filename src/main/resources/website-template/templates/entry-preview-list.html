@@ -1,9 +1,11 @@
-<a href="entry.html?entryId={{special-entry-field name:id}}">
-    <div class="entry-list-listing">
+<div class="entry-list-listing">
+    <a href="entry.html?entryId={{special-entry-field name:id}}">
         <img src="{{special-entry-field name:image}}" class="entry-image">
-        {{template-entry-category}}
+    </a>
+    {{template-entry-category}}
+    <a class="entry-list-listing-body" href="entry.html?entryId={{special-entry-field name:id}}">
         <h3>{{special-entry-field name:title}}</h3>
         <p class='entry-snippet'>{{special-entry-field name:body max-len:60}}</p>
-        {{template-star-rating enabled:false}}
-    </div>
-</a>
+    </a>
+    {{template-star-rating enabled:false}}
+</div>
